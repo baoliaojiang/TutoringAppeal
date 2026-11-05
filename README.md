@@ -11,7 +11,7 @@
 | --- | --- | --- |
 | 在线使用 | https://baoliaojiang.github.io/TutoringAppeal/ | 浏览器直接打开，无需下载 |
 | 单文件网页 | [index.html](index.html) | 下载后双击，离线可用 |
-| Android APK | [v1.0.4 下载](https://github.com/baoliaojiang/TutoringAppeal/releases/download/v1.0.4/TutoringAppeal-v1.0.4.apk) | WebView 离线壳，装好即用，无任何权限 |
+| Android APK | [v1.0.5 下载](https://github.com/baoliaojiang/TutoringAppeal/releases/download/v1.0.5/TutoringAppeal-v1.0.5.apk) | WebView 离线壳，装好即用，无任何权限 |
 
 > ⚠️ **免责声明**
 > 本工具仅作排版辅助，**非官方文书、不构成法律意见**；所有内容由你本人填写并对真实性负责；
@@ -41,7 +41,7 @@
 
 `dist/校园反映小助手.apk` 为已签名的 WebView 壳应用（minSdk 21 / targetSdk 28，V1+V2+V3 签名）。
 体积约 2.9 MB（含内嵌字库），**不申请任何权限**（无网络、无存储、无设备信息），安装后即可在手机上离线使用。
-正式下载入口见上方「下载」表格（Release 资产 `TutoringAppeal-v1.0.4.apk`）。
+正式下载入口见上方「下载」表格（Release 资产 `TutoringAppeal-v1.0.5.apk`）。
 
 ## 隐私
 
@@ -49,6 +49,9 @@
 **删除草稿**：清除浏览器站点数据（设置 → 隐私 → 清除站点数据）即可。
 
 ## 更新日志
+
+**v1.0.5**（2026-11-06）
+- 优化标题：表单固定标题改为「校园情况反映表」，不再使用「委托」字样，避免被理解为代他人代办
 
 **v1.0.4**（2026-11-06）
 - 全新合规整改：生成前增加「已满十四周岁或取得监护人同意」确认
