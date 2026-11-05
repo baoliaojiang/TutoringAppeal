@@ -436,7 +436,7 @@
   .legal-modal[hidden] { display: none; }
   .legal-box { background: var(--surface); border-radius: var(--r-card); width: 100%; max-width: 700px; max-height: min(86vh, 820px); display: flex; flex-direction: column; box-shadow: var(--sh-pop); overflow: hidden; }
   .legal-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 12px 14px; border-bottom: 1px solid var(--border-split); }
-  .legal-tabs { display: flex; gap: 2px; background: var(--fill); padding: 3px; border-radius: 999px; }
+  .legal-tabs { display: flex; flex-wrap: wrap; gap: 2px; background: var(--fill); padding: 3px; border-radius: 16px; }
   .lt { border: none; background: none; font: inherit; font-size: 13px; color: var(--text-2); padding: 6px 15px; border-radius: 999px; cursor: pointer; transition: background .15s, color .15s; }
   .lt.on { background: var(--surface); color: var(--text-1); font-weight: 600; }
   .legal-x { border: none; background: none; color: var(--text-3); font-size: 20px; line-height: 1; width: 30px; height: 30px; border-radius: 8px; cursor: pointer; }
@@ -510,7 +510,7 @@
 </header>
 
 <div class="disclaim-bar"><b>免责声明：</b>本工具仅作排版辅助，非官方文书、不构成法律意见；数据仅存本地浏览器、不上传；请基于事实、经教育主管部门官方渠道逐级提交。举报渠道整理自各地教育部门公开信息，以官方最新公布为准。</div>
-<div class="agree-bar">使用本工具即代表你同意<a href="#" data-doc="terms">《用户协议》</a><a href="#" data-doc="privacy">《隐私政策》</a><a href="#" data-doc="statement">《声明》</a><a href="#" data-doc="license">《开源许可》</a></div>
+<div class="agree-bar">使用本工具即代表你同意<a href="#" data-doc="terms">《用户协议》</a><a href="#" data-doc="privacy">《隐私政策》</a><a href="#" data-doc="statement">《声明》</a><a href="#" data-doc="license">《许可说明》</a></div>
 
 <main>
   <div class="panel">
@@ -634,7 +634,7 @@
         <div class="inner">
           <div class="group-title">其他行为</div>
           <div class="field" data-req-when="other">
-            <label for="f-other-desc">描述<span class="req">*</span></label>
+            <label for="f-other-desc">描述</label>
             <textarea id="f-other-desc" rows="3" placeholder="描述其他违规行为，每行一个自然段"></textarea>
           </div>
         </div>
@@ -666,7 +666,6 @@
       </div>
       <textarea id="f-demands" rows="2" style="display:none"></textarea>
       <textarea id="f-laws" rows="2" style="display:none"></textarea>
-      <textarea id="f-evidence" rows="2" style="display:none"></textarea>
       <textarea id="f-demands-custom" rows="2" placeholder="其他诉求（选填，每行一条）"></textarea>
       <div class="hint">勾选常用诉求，或补充自定义内容；至少选择 / 填写一项</div>
     </div>
@@ -674,14 +673,14 @@
     <hr class="sep">
     <div class="group-title">举报途径</div>
     <div class="field" data-req-any="f-tel,f-net">
-      <label for="f-tel">电话<span class="req">*</span></label>
-      <input id="f-tel" type="text" placeholder="如：0743-8222234">
+      <label for="f-tel">电话</label>
+      <input id="f-tel" type="text" placeholder="如：0591-12345（区号+12345）">
     </div>
     <div class="field" data-req-any="f-tel,f-net">
-      <label for="f-net">网络<span class="req">*</span></label>
+      <label for="f-net">网络</label>
       <input id="f-net" type="text" placeholder="如：XX省教育厅举报平台网址（选下方省份后显示具体入口）">
     </div>
-    <div class="hint" style="font-size:12px; color:var(--text-3);">电话 / 网络至少填一项</div>
+    <div class="hint" style="font-size:12px; color:var(--text-3);">电话 / 网络二选一，填一项即可</div>
 
     <div class="field-row">
       <div class="field">
@@ -714,12 +713,6 @@
       <div class="demand-opts" id="law-opts"></div>
       <div class="hint">勾选要附在文档末尾的法规依据（默认不勾选，按需选择）；具体条款以教育部及各地教育部门官网最新公布为准。</div>
     </div>
-    <div class="field">
-      <label>建议附带材料</label>
-      <div class="demand-opts" id="ev-opts"></div>
-      <textarea id="f-evidence-custom" rows="2" placeholder="其他材料（选填，每行一条）"></textarea>
-      <div class="hint">为提升举报有效性，建议随表附上上述材料（如有）；请勿伪造证据，虚假证据将承担法律责任。</div>
-    </div>
 
     <hr class="sep">
     <div class="group-title">落款</div>
@@ -747,7 +740,7 @@
 </main>
 
 <footer class="site-foot">
-  <span>校园反映小助手 · MIT 开源</span>
+  <span>校园反映小助手 · 自定义许可</span>
   <span class="sf-sep">·</span>
   <a href="https://github.com/baoliaojiang/TutoringAppeal" target="_blank" rel="noopener">项目仓库</a>
   <span class="sf-sep">·</span>
@@ -756,7 +749,8 @@
   <button type="button" id="open-terms">用户协议</button>
   <button type="button" id="open-statement">声明</button>
   <button type="button" id="open-privacy">隐私政策</button>
-  <button type="button" id="open-license">开源许可</button>
+  <button type="button" id="open-license">许可说明</button>
+  <button type="button" id="open-credits">制作人员</button>
 </footer>
 
 <div class="legal-modal" id="legal-modal" hidden>
@@ -766,7 +760,8 @@
         <button type="button" class="lt" data-doc="terms">用户协议</button>
         <button type="button" class="lt" data-doc="privacy">隐私政策</button>
         <button type="button" class="lt" data-doc="statement">声明</button>
-        <button type="button" class="lt" data-doc="license">开源许可</button>
+        <button type="button" class="lt" data-doc="license">许可说明</button>
+        <button type="button" class="lt" data-doc="credits">制作人员</button>
       </div>
       <button type="button" class="legal-x" id="legal-close" aria-label="关闭">×</button>
     </div>
@@ -795,11 +790,11 @@
       <button type="button" class="cd-btn" data-doc="terms">用户协议</button>
       <button type="button" class="cd-btn" data-doc="privacy">隐私政策</button>
       <button type="button" class="cd-btn" data-doc="statement">声明</button>
-      <button type="button" class="cd-btn" data-doc="license">开源许可</button>
+      <button type="button" class="cd-btn" data-doc="license">许可说明</button>
     </div>
     <label class="consent-check">
       <input type="checkbox" class="cs-box" id="cs-docs">
-      <span>我已阅读并同意以上《用户协议》《隐私政策》《声明》《开源许可》</span>
+      <span>我已阅读并同意以上《用户协议》《隐私政策》《声明》《许可说明》</span>
     </label>
     <label class="consent-check">
       <input type="checkbox" class="cs-box" id="cs-risk">
@@ -833,7 +828,7 @@
   var $ = function (id) { return document.getElementById(id); };
   var pv = $('pv');
   var KEY = 'jubao-page-generator-draft-v5';
-  var FIELDS = ['f-school', 'f-address', 'f-type-other', 'bk-time', 'bk-grade', 'bk-notify', 'bk-name', 'bk-real', 'kx-rule', 'kx-actual', 'kx-grade', 'kx-notify', 'kx-name', 'kx-real', 'f-other-desc', 'f-fee-text', 'f-demands', 'f-tel', 'f-net', 'f-signer', 'f-province', 'f-city', 'f-laws', 'f-evidence'];
+  var FIELDS = ['f-school', 'f-address', 'f-type-other', 'bk-time', 'bk-grade', 'bk-notify', 'bk-name', 'bk-real', 'kx-rule', 'kx-actual', 'kx-grade', 'kx-notify', 'kx-name', 'kx-real', 'f-other-desc', 'f-fee-text', 'f-demands', 'f-tel', 'f-net', 'f-signer', 'f-province', 'f-city', 'f-laws'];
   var FIXED_TITLE = '校园情况反映表';
   var FIXED_DECL = '以下信息真实、完整，不存在任何虚假信息，本人自主且自愿提供；如实反映情况，对所反映内容真实性负责，不得捏造事实诬告陷害他人。';
   var REPO_URL = 'https://github.com/baoliaojiang/TutoringAppeal';
@@ -861,16 +856,13 @@
     { k: 'tsn', t: '教育部办公厅《关于开展基础教育规范管理提升年行动的通知》（2025年）', d: '持续规范中小学办学行为、畅通问题反映渠道；已建设全国统一的基础教育规范管理问题反映平台，举报线索自动分派、办理结果全程可溯。' },
     { k: 'yj1', t: '教育部《严禁中小学校和在职中小学教师有偿补课的规定》（教师〔2015〕5号）', d: '严禁中小学校组织、要求学生参加校内外有偿补课；严禁在职中小学教师组织、推荐或诱导学生参加校内外有偿补课。' },
     { k: 'ywjy', t: '《中华人民共和国义务教育法》', d: '学校不得违反国家规定收取费用，不得以向学生推销或者变相推销商品、服务等方式谋取利益；依法保障适龄儿童、少年接受义务教育。' },
-    { k: 'jyf', t: '《中华人民共和国教育法》', d: '受教育者对学校教育教学、管理工作享有提出意见和建议的权利，可依法对学校办学行为进行监督与申诉。' }
-  ];
-  /* 建议附带材料库 */
-  var EVID_LIB = [
-    '收费凭证（收据、转账记录、缴费通知）',
-    '课程表 / 作息时间表截图',
-    '补课或提前开学通知（群消息、纸质通知）',
-    '现场照片或视频',
-    '与学校 / 老师的沟通记录（微信、短信）',
-    '学生证 / 在校证明等其他材料'
+    { k: 'jyf', t: '《中华人民共和国教育法》', d: '受教育者对学校教育教学、管理工作享有提出意见和建议的权利，可依法对学校办学行为进行监督与申诉。' },
+    { k: 'wcn', t: '《中华人民共和国未成年人保护法》（2020 年修订）', d: '学校不得占用国家法定节假日、休息日及寒暑假期，组织未成年学生集体补课，加重其学习负担；应保障未成年学生休息、娱乐和体育锻炼时间。' },
+    { k: 'sm', t: '教育部办公厅《关于进一步加强中小学生睡眠管理工作的通知》（教基厅函〔2021〕11号）', d: '明确不同学段学生必要的睡眠时长，要求合理安排作息，不得以任何形式挤占学生睡眠时间。' },
+    { k: 'jf30', t: '教育部等九部门《中小学生减负措施》（“减负三十条”，2018 年）', d: '严禁学校在节假日、寒暑假组织学生集体补课或变相补课，严禁以任何名义加重学生课业负担。' },
+    { k: 'bhgd', t: '教育部《未成年人学校保护规定》（教育部令第 50 号，2021 年）', d: '学校应保障学生休息权利，不得占用节假日组织集体补课；对学生人身权利、人格尊严等作出专门保护要求。' },
+    { k: 'sfgl', t: '教育部等五部门《关于进一步加强和规范教育收费管理的意见》（2020 年）', d: '学校收费应公开公示、按项目和标准收取；不得擅自设立收费项目、提高收费标准或变相收费。' },
+    { k: 'xf', t: '《信访工作条例》（2022 年）', d: '规范信访事项的提出、受理与办理程序，明确逐级走访与办理时限，要求依法及时处理群众诉求。' }
   ];
   /* 省级行政区（用于举报渠道智能提示，不硬编码具体电话） */
   var PROVINCES = ['北京市','天津市','河北省','山西省','内蒙古自治区','辽宁省','吉林省','黑龙江省','上海市','江苏省','浙江省','安徽省','福建省','江西省','山东省','河南省','湖北省','湖南省','广东省','广西壮族自治区','海南省','重庆市','四川省','贵州省','云南省','西藏自治区','陕西省','甘肃省','青海省','宁夏回族自治区','新疆维吾尔自治区','台湾省','香港特别行政区','澳门特别行政区'];
@@ -906,7 +898,7 @@
     '甘肃': { tel: '0931-8283115', mail: 'jjiao@gsedu.cn' },
     '青海': { tel: '0971-6310023', site: 'https://jyt.qinghai.gov.cn/gk/tzgg/idoc.html?namepid=2093', mail: 'qhjyzxz@163.com' }
   };
-  var DEFAULT_DEMANDS = '停止补课行为\n按照教育局规定的时间开学\n恳请教育主管部门实地核查\n对违规问题依法依规处理';
+  var DEFAULT_DEMANDS = '';   /* 默认不预选任何诉求，由用户自行勾选 */
   var IMG_W = 900;
   var WM_SRC = (typeof WM_SRC_DATA !== 'undefined' && WM_SRC_DATA) ? WM_SRC_DATA : '';
 
@@ -989,11 +981,6 @@
       return '<label class="check" data-law-opt><input type="checkbox" class="law-opt" data-key="' + x.k + '"><span class="box"></span>' + esc(x.t) + '</label>';
     }).join('');
   }
-  function buildEvOpts() {
-    $('ev-opts').innerHTML = EVID_LIB.map(function (x) {
-      return '<label class="check" data-ev-opt><input type="checkbox" class="ev-opt" data-label="' + esc(x) + '"><span class="box"></span>' + esc(x) + '</label>';
-    }).join('');
-  }
   function composeLaws() {
     var keys = [];
     document.querySelectorAll('.law-opt').forEach(function (c) { if (c.checked) keys.push(c.getAttribute('data-key')); });
@@ -1003,22 +990,6 @@
     var keys = ($('f-laws').value || '').split(',').filter(Boolean);
     var set = {}; keys.forEach(function (k) { set[k] = true; });
     document.querySelectorAll('.law-opt').forEach(function (c) { c.checked = !!set[c.getAttribute('data-key')]; });
-  }
-  function composeEv() {
-    var sel = [];
-    document.querySelectorAll('.ev-opt').forEach(function (c) { if (c.checked) sel.push(c.getAttribute('data-label')); });
-    var custom = getLines($('f-evidence-custom').value);
-    $('f-evidence').value = sel.concat(custom).join('\n');
-  }
-  function restoreEvUI() {
-    var lines = getLines($('f-evidence').value);
-    var defaults = {};
-    document.querySelectorAll('.ev-opt').forEach(function (c) { defaults[c.getAttribute('data-label')] = true; });
-    var set = {};
-    lines.forEach(function (x) { if (defaults[x]) set[x] = true; });
-    document.querySelectorAll('.ev-opt').forEach(function (c) { c.checked = !!set[c.getAttribute('data-label')]; });
-    var custom = lines.filter(function (x) { return !defaults[x]; });
-    $('f-evidence-custom').value = custom.join('\n');
   }
   /* 举报渠道智能提示：指引式，不硬编码具体电话（仅 12345 全国通用） */
   function updateChannelHint() {
@@ -1248,13 +1219,6 @@
       secs.push(['附：相关法律依据', lawHTML]);
     }
 
-    var evLines = getLines(d['f-evidence']);
-    if (evLines.length) {
-      var evHTML = '<div class="ev-note">为提升举报有效性，建议随表附上以下材料（如有）：</div>'
-        + '<ul class="ev-list">' + evLines.map(function (x) { return '<li>' + esc(x) + '</li>'; }).join('') + '</ul>';
-      secs.push(['建议附带材料', evHTML]);
-    }
-
     var body = secs.map(function (s, i) {
       return '<section><h2>' + (i + 1) + '. ' + esc(s[0]) + '</h2>' + s[1] + '</section>';
     }).join('\n');
@@ -1317,11 +1281,6 @@
     if (lawItems.length) {
       blocks.push('附：相关法律依据：\n' + lawItems.map(function (x) { return ' - ' + x.t + '：' + x.d; }).join('\n') + '\n（所列依据为常见相关规定，请以官方最新文本为准）');
     }
-    var evLines = getLines(d['f-evidence']);
-    if (evLines.length) {
-      blocks.push('建议附带材料（如有）：\n' + evLines.map(function (x) { return ' - ' + x; }).join('\n') + '\n（请勿伪造证据，虚假证据将承担法律责任）');
-    }
-
     var signer = (d['f-signer'] || '').trim();
     var out = [FIXED_TITLE, '', '【声明】' + FIXED_DECL];
     if (blocks.length) out.push('', blocks.join('\n\n'));
@@ -1472,7 +1431,6 @@
       if (!(d['kx-grade'] || '').trim()) add('开学·年级', 'kx-grade');
       if (!(d['kx-real'] || '').trim()) add('开学·实质', 'kx-real');
     }
-    if ((d['f-type-other'] || '').trim() && !(d['f-other-desc'] || '').trim()) add('其他行为·描述', 'f-other-desc');
     if (!getLines(d['f-demands']).length) add('诉求（至少一条）', 'f-demands');
     if (!(d['f-tel'] || '').trim() && !(d['f-net'] || '').trim()) add('举报途径（电话或网络）', 'f-tel');
     return items;
@@ -1516,7 +1474,7 @@
       d.buke || d.kaixue || (d['f-type-other'] || '').trim() ||
       getLines(d['f-demands']).length || (d['f-tel'] || '').trim() ||
       (d['f-net'] || '').trim() || (d['f-other-desc'] || '').trim() ||
-      (d['f-laws'] || '').trim() || (d['f-evidence'] || '').trim()
+      (d['f-laws'] || '').trim()
     );
   }
 
@@ -1568,7 +1526,6 @@
     d.buke = false; d.kaixue = false; d.feeChoice = '';
     d['f-demands'] = DEFAULT_DEMANDS;
     d['f-laws'] = '';       /* 附录默认均不勾选 */
-    d['f-evidence'] = '';   /* 附录默认均不勾选 */
     return d;
   }
 
@@ -1581,7 +1538,7 @@
     ['fee-none', 'fee-unknown', 'fee-yes'].forEach(function (id) { $(id).checked = false; });
     var map = { none: 'fee-none', unknown: 'fee-unknown', yes: 'fee-yes' };
     if (map[d.feeChoice]) $(map[d.feeChoice]).checked = true;
-    restoreDemandUI(); restoreLawUI(); restoreEvUI();
+    restoreDemandUI(); restoreLawUI();
   }
 
   /* 当前内容自动存入活动草稿（输入时调用） */
@@ -1801,7 +1758,6 @@
     });
   });
   $('f-demands-custom').addEventListener('input', function () { composeDemands(); onInput(); });
-  $('f-evidence-custom').addEventListener('input', function () { composeEv(); onInput(); });
   $('f-province').addEventListener('change', function () { onInput(); updateChannelHint(); });
   $('f-city').addEventListener('input', function () { onInput(); });
 
@@ -1869,7 +1825,6 @@
   /* ---------- 初始化 ---------- */
   fillProvinces();
   buildLawOpts();
-  buildEvOpts();
 
   /* 多案例草稿：载入活动草稿，无则建默认案例 */
   var drafts0 = getDrafts();
@@ -1905,20 +1860,17 @@
   document.querySelectorAll('.law-opt').forEach(function (c) {
     c.addEventListener('change', function () { c.closest('.check').classList.toggle('on', c.checked); composeLaws(); onInput(); });
   });
-  document.querySelectorAll('.ev-opt').forEach(function (c) {
-    c.addEventListener('change', function () { c.closest('.check').classList.toggle('on', c.checked); composeEv(); onInput(); });
-  });
-  /* ---------- 用户协议 / 声明 / 开源许可 ---------- */
+  /* ---------- 用户协议 / 声明 / 许可说明 ---------- */
   var LEGAL = [
   { id: 'terms', title: '用户协议', summary: '开源第三方排版辅助工具，按现状提供；生成内容须自行核实，不得直接提交。', version: '1.0', updatedAt: '2026-11-06', sections: [
-    { h: '一、协议范围与接受', t: '本协议是你与本工具作者之间关于使用「校园反映小助手」的约定，与《声明》《开源许可》共同构成完整合意。\n下载、打开或实际使用本工具，即表示你已阅读并接受全部条款；若不同意任一条款，请停止使用并删除本机数据与已生成的文件。' },
+    { h: '一、协议范围与接受', t: '本协议是你与本工具作者之间关于使用「校园反映小助手」的约定，与《声明》《许可说明》《制作人员》共同构成完整合意。\n下载、打开或实际使用本工具，即表示你已阅读并接受全部条款；若不同意任一条款，请停止使用并删除本机数据与已生成的文件。' },
     { h: '二、软件性质与身份说明', t: '本工具是个人开发的第三方开源<b>排版辅助</b>工具，用于把你想要反映的情况整理成结构完整、便于阅读的书面材料。\n<b>本工具不是学校、教育主管部门或任何举报平台的官方系统</b>，与任何学校、教育主管部门、受理单位不存在隶属、授权、合作或背书关系，也不代表任何一方的立场。\n界面中的表格样式、栏目名称与编号顺序，仅用于说明所参照的常见诉求表结构；各校、各地要求可能随时调整，提交前请以受理单位当期下发的表格与口径为准。' },
-    { h: '三、使用许可', t: '在遵守本协议的前提下，你可以在个人用途中免费使用本工具：打开、填写、导出你自己创建的内容。\n源码以 MIT 许可证开源（详见「开源许可」），你可以使用、修改与再分发，但须保留版权声明与许可证文本。\n未经许可，不得以本工具名义开展收费代写、代办、咨询，或宣称获得学校、教育主管部门的官方认证、推荐或指定。' },
+    { h: '三、使用许可', t: '在遵守本协议的前提下，你可以在个人用途中免费使用本工具：打开、填写、导出你自己创建的内容。\n源码采用自定义使用许可（非开源，详见「许可说明」）：学习、研究与自用可直接使用，但须保留出处；商业使用与对外分发需先获得授权。\n未经许可，不得以本工具名义开展收费代写、代办、咨询，或宣称获得学校、教育主管部门的官方认证、推荐或指定。' },
     { h: '四、本机数据与备份责任', t: '本工具不设账号、不联网、不上传。全部内容保存在你设备的浏览器本地存储中。\n清除浏览器站点数据、更换浏览器、更换设备或卸载应用，都会导致草稿与已填内容丢失，开发者没有副本、也无法找回。\n重要内容请在生成后自行另存为文件。' },
     { h: '五、用户行为规范', t: '你承诺不将本工具用于下列行为：\n1. 虚构事实：编造未发生的补课、收费或违规情况，或刻意夸大情节；\n2. 伪造材料：制作、修改截图、单据、照片等证据；\n3. 诬告陷害：借反映之名针对特定教师、学校进行人身攻击或不实指控；\n4. 侵犯隐私：未经同意填写他人姓名、身份证号、联系方式、住址等个人信息；\n5. 冒名提交：以他人名义签署或提交材料。\n上述行为可能构成违法，责任由你自行承担。' },
     { h: '六、生成内容与提交规则', t: '本工具只做排版与措辞整理，不判断事实真伪、不提供法律意见、不预测处理结果。\n任何生成内容都只是<b>草稿</b>：事实、时间、金额、诉求必须由你逐条核对，<b>不能直接提交给有关部门</b>。\n确需提交时，请按属地与层级通过官方渠道逐级反映，并自行保留证据原件；受理与否、如何处理，由受理单位依法决定。' },
     { h: '七、第三方服务与费用', t: '本工具不接入第三方接口，不需要账号与密钥，不产生任何费用，也不含广告与统计代码。\n若你把生成的文件交给第三方平台或使用其他工具处理，其行为、条款与费用与本工具无关。' },
-    { h: '八、知识产权', t: '本工具源码与界面以 MIT 许可证发布，第三方依赖遵循各自许可证（见「开源许可」）。\n界面不复制任何学校校徽、校名标识或第三方商标；如有疏漏，请通过项目仓库的 Issue 联系，核实后移除。\n你填写与生成的内容归你所有，开发者不主张任何权利，也无从访问。' },
+    { h: '八、知识产权', t: '本工具源码与界面采用自定义使用许可（见「许可说明」），第三方组件遵循各自许可证。\n界面不复制任何学校校徽、校名标识或第三方商标；如有疏漏，请通过项目仓库的 Issue 联系，核实后移除。\n你填写与生成的内容归你所有，开发者不主张任何权利，也无从访问。' },
     { h: '九、服务变更、中止与终止', t: '本项目由个人维护，可能因学业、维护成本或技术原因更新、暂停或停止，不承诺可用性、不承诺持续更新、不承诺长期兼容特定浏览器版本。\n你可以在任何时候停止使用并删除本机数据，无需通知开发者。' },
     { h: '十、免责与责任限制', t: '本工具按「现状」提供，不作任何明示或默示担保，包括但不限于适销性、特定用途适用性与不侵权担保。\n在适用法律允许的最大范围内，因使用或无法使用本工具导致的处理结果、评价、处分、名誉损失、数据丢失、设备损坏或第三方索赔，开发者不承担责任。\n<b>将生成内容直接提交，或因内容失实、材料不全、渠道不当产生的一切后果，由提交人自负。</b>' },
     { h: '十一、协议更新', t: '本协议随功能与法律要求变化更新，更新时修改版本号与更新日期并在工具内展示；涉及权利义务实质变更的，会以显著方式提示。\n继续使用即视为接受更新后的条款；若不接受，请停止使用并删除本机数据。' },
@@ -1943,11 +1895,19 @@
     { h: '七、政策更新', t: '本政策随功能与法律要求变化更新，更新时修改版本号与更新日期并在工具内展示。\n继续使用即视为接受更新后的政策；若不接受，请停止使用并清除本机数据。' },
     { h: '八、联系我们', t: '本工具由个人开发维护，不设客服电话与在线客服，也不通过服务器接收你的个人信息。\n与隐私相关的疑问或纠错，请通过项目仓库的 Issue 提出；请勿在公开渠道粘贴真实姓名、联系方式等敏感信息。' }
   ] },
-  { id: 'license', title: '开源许可', summary: 'MIT 许可证正文，以及随应用分发的组件说明。', version: '1.0', updatedAt: '2026-11-06', sections: [
-    { h: '一、MIT License', t: 'Copyright (c) 2026 TutoringAppeal Contributors\n\nPermission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the &quot;Software&quot;), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions://n//nThe above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.\n\nTHE SOFTWARE IS PROVIDED &quot;AS IS&quot;, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.' },
-    { h: '二、随应用分发的第三方组件', t: '网页与 APK 均为单文件实现，<b>不含第三方 JavaScript / CSS 库</b>。\n字体内嵌「Tutoring Sans」：由 <b>思源黑体 / Noto Sans SC</b> 子集化得到，遵循 SIL Open Font License 1.1，允许嵌入、修改与随软件分发，版权归原作者（Google / Adobe）。\n未内嵌任何付费商用字体，界面上也不调用任何品牌商用字体。\n导出页脚中的二维码图像由构建脚本在本地生成，内联为图片数据，不依赖第三方服务。' },
-    { h: '三、不含第三方素材', t: '应用内不包含学校校徽、校名标识图片、商业字体或图库素材；界面图标为项目内绘制的线性图标。\n若你认为某处内容侵犯了你的权利，可通过项目仓库的 Issue 联系，核实后会移除。' },
-    { h: '四、字体许可全文（SIL OFL 1.1）', t: 'Copyright © 2014-2021 Adobe (http://www.adobe.com/), with Reserved Font Name \'Source\'.\n\nThis Font Software is licensed under the SIL Open Font License, Version 1.1.\nThis license is copied below, and is also available with a FAQ at: https://openfontlicense.org\n\n-----------------------------------------------------------\nSIL OPEN FONT LICENSE Version 1.1 - 26 February 2007\n-----------------------------------------------------------\n\nPREAMBLE\nThe goals of the Open Font License (OFL) are to stimulate worldwide development of collaborative font projects, to support the font creation efforts of academic and linguistic communities, and to provide a free and open framework in which fonts may be shared and improved in partnership with others.\n\nThe OFL allows the licensed fonts to be used, studied, modified and redistributed freely as long as they are not sold by themselves. The fonts, including any derivative works, can be bundled, embedded, redistributed and/or sold with any software provided that any reserved names are not used by derivative works. The fonts and derivatives, however, cannot be released under any other type of license. The requirement for fonts to remain under this license does not apply to any document created using the fonts or their derivatives.\n\nDEFINITIONS\n"Font Software" refers to the set of files released by the Copyright Holder(s) under this license and clearly marked as such. This may include source files, build scripts and documentation.\n\n"Reserved Font Name" refers to any names specified as such after the copyright statement(s).\n\n"Original Version" refers to the collection of Font Software components as distributed by the Copyright Holder(s).\n\n"Modified Version" refers to any derivative made by adding to, deleting, or substituting -- in part or in whole -- any of the components of the Original Version, by changing formats or by porting the Font Software to a new environment.\n\n"Author" refers to any designer, engineer, programmer, technical writer or other person who contributed to the Font Software.\n\nPERMISSION & CONDITIONS\nPermission is hereby granted, free of charge, to any person obtaining a copy of the Font Software, to use, study, copy, merge, embed, modify, redistribute, and sell modified and unmodified copies of the Font Software, subject to the following conditions:\n\n1) Neither the Font Software nor any of its individual components, in Original or Modified Versions, may be sold by itself.\n\n2) Original or Modified Versions of the Font Software may be bundled, redistributed and/or sold with any software, provided that each copy contains the above copyright notice and this license. These can be included either as stand-alone text files, human-readable headers or in the appropriate machine-readable metadata fields within text or binary files as long as those fields can be easily viewed by the user.\n\n3) No Modified Version of the Font Software may use the Reserved Font Name(s) unless explicit written permission is granted by the corresponding Copyright Holder. This restriction only applies to the primary font name as presented to the users.\n\n4) The name(s) of the Copyright Holder(s) or the Author(s) of the Font Software shall not be used to promote, endorse or advertise any Modified Version, except to acknowledge the contribution(s) of the Copyright Holder(s) and the Author(s) or with their explicit written permission.\n\n5) The Font Software, modified or unmodified, in part or in whole, must be distributed entirely under this license, and must not be distributed under any other license. The requirement for fonts to remain under this license does not apply to any document created using the Font Software.\n\nTERMINATION\nThis license becomes null and void if any of the above conditions are not met.\n\nDISCLAIMER\nTHE FONT SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO ANY WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT OF COPYRIGHT, PATENT, TRADEMARK, OR OTHER RIGHT. IN NO EVENT SHALL THE COPYRIGHT HOLDER BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, INCLUDING ANY GENERAL, SPECIAL, INDIRECT, INCIDENTAL, OR CONSEQUENTIAL DAMAGES, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF THE USE OR INABILITY TO USE THE FONT SOFTWARE OR FROM OTHER DEALINGS IN THE FONT SOFTWARE.' }
+  { id: 'license', title: '许可说明', summary: '自定义使用许可（非开源）：学习免费，商用与对外分发需先获授权，自用保留出处即可。', version: '2.0', updatedAt: '2026-11-06', sections: [
+    { h: '一句话', t: '学习免费，商用与对外分发先问，自用与帮人排版保留出处即可。\n本工具采用<b>自定义使用许可（非许可说明）</b>，全文见仓库根目录 LICENSE。' },
+    { h: '一、可以直接做（不用授权、不收费）', t: '· 读源码、学习、研究，包括把代码抄进作业、课程设计、论文附录；\n· 自己安装使用，生成自己要提交的材料；\n· 帮同学、家人、朋友用它排版他们自己的材料，不收费、不代填事实；\n· 把在线版链接发给需要的人，让对方自己填写。' },
+    { h: '二、要先拿授权', t: '商业使用：收费售卖、付费课程或训练营、按次咨询与代做、招投标项目、企业或机构内训，把本软件作为服务或产品的一部分对外提供。\n二次分发（自用与转发链接之外）：上架应用商店、公开传到下载站或网盘、打包进别的软件、随硬件或课程包一起发、改个名字当自己的作品发布。\n授权入口：通过项目仓库的 Issue 联系作者，说明「谁、用来做什么、发给谁、是否收费」。拿到明确答复再使用；没有答复视为未获授权；授权只对答复里写明的范围有效。' },
+    { h: '三、任何使用都要保留', t: '本项目由 baoliaojiang 开发，项目地址：https://github.com/baoliaojiang/TutoringAppeal 。\n署名要求写在软件内使用者能点到的位置（页脚「制作人员」），不能只写在安装包说明、压缩包文件名或源码注释里；不允许删除、遮挡、置灰或改名换皮隐藏。\n二次分发的版本请注明「本版本由 …… 基于 校园反映小助手 修改」。' },
+    { h: '四、历史版本', t: 'v1.0.6（含）之前发布的版本在发布时采用 MIT 许可，已经获得的授权继续有效，不会被收回。\n从当前版本起，使用与分发按 LICENSE 执行。' },
+    { h: '五、第三方组件', t: '第三方 JavaScript / CSS 库：无（单文件实现）。\n内嵌字体：思源黑体子集（Tutoring Sans），遵循 SIL Open Font License 1.1，全文见仓库根目录 OFL.txt；未内嵌任何付费商用字体。\n本项目许可不改变这些组件的授权条件。' }
+  ] },
+  { id: 'credits', title: '制作人员', summary: '开发者、项目地址与字体版权。本页同时是 LICENSE 要求的署名位置。', version: '1.0', updatedAt: '2026-11-06', sections: [
+    { h: '开发与维护', t: 'baoliaojiang（个人开发与维护）' },
+    { h: '项目地址', t: 'https://github.com/baoliaojiang/TutoringAppeal\n在线版：https://baoliaojiang.github.io/TutoringAppeal/' },
+    { h: '字体版权', t: '内嵌字体「Tutoring Sans」由思源黑体 / Noto Sans SC 子集化得到。\nCopyright © 2014-2021 Adobe (http://www.adobe.com/), with Reserved Font Name \'Source\'.\n遵循 SIL Open Font License 1.1，全文见仓库根目录 OFL.txt。' },
+    { h: '反馈与纠错', t: '发现错误、侵权素材或表述问题，请通过项目仓库的 Issue 联系，核实后修正或移除。' }
   ] }
   ];
 
@@ -1964,7 +1924,7 @@
     });
     $('legal-body').innerHTML = html;
     $('legal-meta').textContent = doc.title + ' · 版本 ' + doc.version + ' · 更新于 ' + doc.updatedAt
-      + ' · 与《用户协议》《声明》《开源许可》共同构成完整合意';
+      + ' · 与《用户协议》《声明》《许可说明》共同构成完整合意';
     $('legal-body').scrollTop = 0;
   }
   function openLegal(id) { renderLegal(id); $('legal-modal').hidden = false; }
@@ -1977,6 +1937,7 @@
   $('open-statement').addEventListener('click', function () { openLegal('statement'); });
   $('open-privacy').addEventListener('click', function () { openLegal('privacy'); });
   $('open-license').addEventListener('click', function () { openLegal('license'); });
+  $('open-credits').addEventListener('click', function () { openLegal('credits'); });
   $('legal-close').addEventListener('click', closeLegal);
   $('legal-modal').addEventListener('click', function (e) { if (e.target === this) closeLegal(); });
   document.querySelectorAll('.lt').forEach(function (b) {
