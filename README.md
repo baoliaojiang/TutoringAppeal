@@ -3,7 +3,7 @@
 一个**纯本地运行**的单文件网页工具，帮你快速填写并自动排版「校园诉求 / 反映表」，
 支持多案例草稿、场景模板、一键复制 / 导出 Word / 下载图片 / 打印 PDF。
 
-![screenshot](screenshot.png)
+![screenshot](screenshot.png?v=1.0.5)
 
 ## 下载
 
