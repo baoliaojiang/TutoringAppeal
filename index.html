@@ -704,7 +704,7 @@
         <li><b>中国教育督导</b>：微信搜索并关注公众号「中国教育督导」→ 菜单「举报平台」（仅限中小学，需实名）。</li>
         <li><b>各省规范办学行为举报平台</b>：选择下方「所在省份」后，自动显示该省举报电话 / 网址 / 邮箱。</li>
       </ul>
-      <div class="oh-note">渠道整理自各地教育部门公开信息，仅供参考，以官方最新公布为准；请逐级递交、保护隐私，避免用实名手机号举报与自身相关事项。</div>
+      <div class="oh-note">渠道整理自各地教育部门公开信息（资料整理于 2026 年 11 月），仅供参考；号码与网址可能调整，提交前请以官方最新公布为准。请逐级递交、保护隐私，避免用实名手机号反映与自身相关的事项。</div>
     </details>
 
     <hr class="sep">
@@ -804,6 +804,10 @@
     <label class="consent-check">
       <input type="checkbox" class="cs-box" id="cs-risk">
       <span><b>我知道这份材料不能直接提交给有关部门</b>；如直接提交，可能被认定为无效材料、失实反映甚至诬告，由此产生的后果由我本人承担。</span>
+    </label>
+    <label class="consent-check">
+      <input type="checkbox" class="cs-box" id="cs-guardian">
+      <span>我确认<b>已满十四周岁</b>，或作为监护人、在取得监护人同意后使用本工具。</span>
     </label>
     <label class="consent-check">
       <input type="checkbox" class="cs-box" id="cs-truth">
@@ -1724,7 +1728,7 @@
   }
   /* 生成前必弹：先同意四份文档，再放行 */
   var _consentCb = null;
-  var CS_BOXES = ['cs-docs', 'cs-risk', 'cs-truth'];
+  var CS_BOXES = ['cs-docs', 'cs-risk', 'cs-guardian', 'cs-truth'];
   function consentSync() {
     var ok = true;
     for (var i = 0; i < CS_BOXES.length; i++) { if (!$(CS_BOXES[i]).checked) { ok = false; break; } }
@@ -1934,7 +1938,7 @@
     { h: '二、信息存放在哪里', t: '全部内容（含草稿、案例、设置）保存在你设备的浏览器本地存储（localStorage）中，属于本机数据。\n关闭网页、关闭 APK、断开网络后仍可使用；数据不会离开你的设备。' },
     { h: '三、我们不收集什么', t: '不收集姓名、手机号、身份证号等身份信息；不收集 IP、位置、设备型号、浏览器指纹；不写 Cookie；不接入第三方统计、广告或 SDK。\n因此我们无法知道你填了什么，也无从复原。' },
     { h: '四、导出文件的风险', t: '生成的文件（Word / 图片 / 打印件）保存到你自己的设备，之后由你保管与传递。\n一旦你把文件发给他人或上传到平台，文件内容将脱离本工具的保护范围，请自行评估接收方与用途。' },
-    { h: '五、未成年人保护', t: '本工具面向家长、监护人及成年使用者，<b>不建议未成年学生单独使用</b>。\n请勿填写学生姓名、身份证号、家庭住址、班级学号等完整个人信息；涉及未成年人的材料，建议先征得监护人同意再行处理。' },
+    { h: '五、未成年人保护', t: '本工具面向家长、监护人及成年使用者使用，<b>不建议未成年学生单独使用</b>；不满十四周岁的未成年人，须由监护人陪同并在取得监护人同意后使用。\n请勿填写学生姓名、身份证号、家庭住址、班级学号等完整个人信息；涉及未成年人的材料，应由监护人核对后再行处理。' },
     { h: '六、删除与撤回', t: '删除方式：清除浏览器站点数据（设置 → 隐私 → 清除站点数据），或卸载 APK。删除后不可恢复，开发者没有备份。\n已导出的文件请在你自己设备的文件夹中手动删除。' },
     { h: '七、政策更新', t: '本政策随功能与法律要求变化更新，更新时修改版本号与更新日期并在工具内展示。\n继续使用即视为接受更新后的政策；若不接受，请停止使用并清除本机数据。' },
     { h: '八、联系我们', t: '本工具由个人开发维护，不设客服电话与在线客服，也不通过服务器接收你的个人信息。\n与隐私相关的疑问或纠错，请通过项目仓库的 Issue 提出；请勿在公开渠道粘贴真实姓名、联系方式等敏感信息。' }
@@ -1942,7 +1946,8 @@
   { id: 'license', title: '开源许可', summary: 'MIT 许可证正文，以及随应用分发的组件说明。', version: '1.0', updatedAt: '2026-11-06', sections: [
     { h: '一、MIT License', t: 'Copyright (c) 2026 TutoringAppeal Contributors\n\nPermission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the &quot;Software&quot;), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions://n//nThe above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.\n\nTHE SOFTWARE IS PROVIDED &quot;AS IS&quot;, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.' },
     { h: '二、随应用分发的第三方组件', t: '网页与 APK 均为单文件实现，<b>不含第三方 JavaScript / CSS 库</b>。\n字体内嵌「Tutoring Sans」：由 <b>思源黑体 / Noto Sans SC</b> 子集化得到，遵循 SIL Open Font License 1.1，允许嵌入、修改与随软件分发，版权归原作者（Google / Adobe）。\n未内嵌任何付费商用字体，界面上也不调用任何品牌商用字体。\n导出页脚中的二维码图像由构建脚本在本地生成，内联为图片数据，不依赖第三方服务。' },
-    { h: '三、不含第三方素材', t: '应用内不包含学校校徽、校名标识图片、商业字体或图库素材；界面图标为项目内绘制的线性图标。\n若你认为某处内容侵犯了你的权利，可通过项目仓库的 Issue 联系，核实后会移除。' }
+    { h: '三、不含第三方素材', t: '应用内不包含学校校徽、校名标识图片、商业字体或图库素材；界面图标为项目内绘制的线性图标。\n若你认为某处内容侵犯了你的权利，可通过项目仓库的 Issue 联系，核实后会移除。' },
+    { h: '四、字体许可全文（SIL OFL 1.1）', t: 'Copyright © 2014-2021 Adobe (http://www.adobe.com/), with Reserved Font Name \'Source\'.\n\nThis Font Software is licensed under the SIL Open Font License, Version 1.1.\nThis license is copied below, and is also available with a FAQ at: https://openfontlicense.org\n\n-----------------------------------------------------------\nSIL OPEN FONT LICENSE Version 1.1 - 26 February 2007\n-----------------------------------------------------------\n\nPREAMBLE\nThe goals of the Open Font License (OFL) are to stimulate worldwide development of collaborative font projects, to support the font creation efforts of academic and linguistic communities, and to provide a free and open framework in which fonts may be shared and improved in partnership with others.\n\nThe OFL allows the licensed fonts to be used, studied, modified and redistributed freely as long as they are not sold by themselves. The fonts, including any derivative works, can be bundled, embedded, redistributed and/or sold with any software provided that any reserved names are not used by derivative works. The fonts and derivatives, however, cannot be released under any other type of license. The requirement for fonts to remain under this license does not apply to any document created using the fonts or their derivatives.\n\nDEFINITIONS\n"Font Software" refers to the set of files released by the Copyright Holder(s) under this license and clearly marked as such. This may include source files, build scripts and documentation.\n\n"Reserved Font Name" refers to any names specified as such after the copyright statement(s).\n\n"Original Version" refers to the collection of Font Software components as distributed by the Copyright Holder(s).\n\n"Modified Version" refers to any derivative made by adding to, deleting, or substituting -- in part or in whole -- any of the components of the Original Version, by changing formats or by porting the Font Software to a new environment.\n\n"Author" refers to any designer, engineer, programmer, technical writer or other person who contributed to the Font Software.\n\nPERMISSION & CONDITIONS\nPermission is hereby granted, free of charge, to any person obtaining a copy of the Font Software, to use, study, copy, merge, embed, modify, redistribute, and sell modified and unmodified copies of the Font Software, subject to the following conditions:\n\n1) Neither the Font Software nor any of its individual components, in Original or Modified Versions, may be sold by itself.\n\n2) Original or Modified Versions of the Font Software may be bundled, redistributed and/or sold with any software, provided that each copy contains the above copyright notice and this license. These can be included either as stand-alone text files, human-readable headers or in the appropriate machine-readable metadata fields within text or binary files as long as those fields can be easily viewed by the user.\n\n3) No Modified Version of the Font Software may use the Reserved Font Name(s) unless explicit written permission is granted by the corresponding Copyright Holder. This restriction only applies to the primary font name as presented to the users.\n\n4) The name(s) of the Copyright Holder(s) or the Author(s) of the Font Software shall not be used to promote, endorse or advertise any Modified Version, except to acknowledge the contribution(s) of the Copyright Holder(s) and the Author(s) or with their explicit written permission.\n\n5) The Font Software, modified or unmodified, in part or in whole, must be distributed entirely under this license, and must not be distributed under any other license. The requirement for fonts to remain under this license does not apply to any document created using the Font Software.\n\nTERMINATION\nThis license becomes null and void if any of the above conditions are not met.\n\nDISCLAIMER\nTHE FONT SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO ANY WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT OF COPYRIGHT, PATENT, TRADEMARK, OR OTHER RIGHT. IN NO EVENT SHALL THE COPYRIGHT HOLDER BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, INCLUDING ANY GENERAL, SPECIAL, INDIRECT, INCIDENTAL, OR CONSEQUENTIAL DAMAGES, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF THE USE OR INABILITY TO USE THE FONT SOFTWARE OR FROM OTHER DEALINGS IN THE FONT SOFTWARE.' }
   ] }
   ];
 
