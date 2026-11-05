@@ -11,7 +11,7 @@
 | --- | --- | --- |
 | 在线使用 | https://baoliaojiang.github.io/TutoringAppeal/ | 浏览器直接打开，无需下载 |
 | 单文件网页 | [index.html](index.html) | 下载后双击，离线可用 |
-| Android APK | [v1.0.10 下载](https://github.com/baoliaojiang/TutoringAppeal/releases/download/v1.0.10/TutoringAppeal-v1.0.10.apk) | WebView 离线壳，装好即用，无任何权限 |
+| Android APK | [v1.0.11 下载](https://github.com/baoliaojiang/TutoringAppeal/releases/download/v1.0.11/TutoringAppeal-v1.0.11.apk) | WebView 离线壳，装好即用，无任何权限 |
 
 > ⚠️ **免责声明**
 > 本工具仅作排版辅助，**非官方文书、不构成法律意见**；所有内容由你本人填写并对真实性负责；
@@ -40,8 +40,8 @@
 ## 打包为 Android App
 
 `dist/校园反映小助手.apk` 为已签名的 WebView 壳应用（minSdk 21 / targetSdk 28，V1+V2+V3 签名）。
-体积约 2.9 MB（含内嵌字库），**不申请任何权限**（无网络、无存储、无设备信息），安装后即可在手机上离线使用。
-正式下载入口见上方「下载」表格（Release 资产 `TutoringAppeal-v1.0.10.apk`）。
+体积约 2.1 MB（含内嵌字库），**不申请任何权限**（无网络、无存储、无设备信息），安装后即可在手机上离线使用。
+正式下载入口见上方「下载」表格（Release 资产 `TutoringAppeal-v1.0.11.apk`）。
 
 ## 隐私
 
@@ -49,6 +49,11 @@
 **删除草稿**：清除浏览器站点数据（设置 → 隐私 → 清除站点数据）即可。
 
 ## 更新日志
+
+**v1.0.11**（2026-11-06）
+- 修复导出：下载图片在浏览器提示「生成出错」，现已能正常保存
+- 全新举报途径：选好省份和城市，电话自动写成「区号+12345（哪个部门）」，网络自动填该省教育厅的举报平台
+- 优化填写：自定义类型必须写清行为描述，避免反映内容含糊
 
 **v1.0.10**（2026-11-06）
 - 优化 APK 导出：图片保存到「下载/TutoringAppeal」并直接弹出分享

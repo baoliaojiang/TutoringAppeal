@@ -662,8 +662,8 @@
         <div class="inner">
           <div class="group-title">其他行为</div>
           <div class="field" data-req-when="other">
-            <label for="f-other-desc">描述</label>
-            <textarea id="f-other-desc" rows="3" placeholder="描述其他违规行为，每行一个自然段"></textarea>
+            <label for="f-other-desc">描述<span class="req">*</span></label>
+            <textarea id="f-other-desc" rows="3" placeholder="描述其他违规行为，每行一个自然段（填了自定义类型时必填）"></textarea>
           </div>
         </div>
       </div>
@@ -700,16 +700,6 @@
 
     <hr class="sep">
     <div class="group-title">举报途径</div>
-    <div class="field" data-req-any="f-tel,f-net">
-      <label for="f-tel">电话</label>
-      <input id="f-tel" type="text" placeholder="如：0591-12345（区号+12345）">
-    </div>
-    <div class="field" data-req-any="f-tel,f-net">
-      <label for="f-net">网络</label>
-      <input id="f-net" type="text" placeholder="如：XX省教育厅举报平台网址（选下方省份后显示具体入口）">
-    </div>
-    <div class="hint" style="font-size:12px; color:var(--text-3);">电话 / 网络二选一，填一项即可</div>
-
     <div class="field-row">
       <div class="field">
         <label for="f-province">所在省份</label>
@@ -717,10 +707,19 @@
       </div>
       <div class="field">
         <label for="f-city">所在城市<span class="opt">选填</span></label>
-        <input id="f-city" type="text" placeholder="如：XX 市">
+        <input id="f-city" type="text" placeholder="如：合肥">
       </div>
     </div>
     <div class="channel-hint" id="channel-hint"></div>
+    <div class="field" data-req-any="f-tel,f-net">
+      <label for="f-tel">电话</label>
+      <input id="f-tel" type="text" placeholder="选省份 / 城市后自动填入「区号+12345（部门）」">
+    </div>
+    <div class="field" data-req-any="f-tel,f-net">
+      <label for="f-net">网络</label>
+      <input id="f-net" type="text" placeholder="选省份 / 城市后自动填入对应部门举报平台">
+    </div>
+    <div class="hint" style="font-size:12px; color:var(--text-3);">选好省份 / 城市会自动填好并注明部门，可直接改成自己的号码或网址；电话 / 网络填一项即可</div>
 
     <details class="online-help">
       <summary>常用网络 / 电话举报入口（点击展开，含链接与具体操作）</summary>
@@ -939,6 +938,19 @@
   var getLines = function (v) {
     return String(v || '').split(/\r?\n/).map(function (t) { return t.trim(); }).filter(Boolean);
   };
+  /* UTF-8 安全 base64：图片导出必须走 data: URI，blob: 会污染 canvas */
+  function b64utf8(str) {
+    var bin = '';
+    try {
+      var bytes = new TextEncoder().encode(str), CH = 0x8000;
+      for (var i = 0; i < bytes.length; i += CH) {
+        bin += String.fromCharCode.apply(null, bytes.subarray(i, i + CH));
+      }
+    } catch (e) {
+      bin = unescape(encodeURIComponent(str));
+    }
+    return btoa(bin);
+  }
   var today = function () {
     var n = new Date(), p = function (x) { return String(x).padStart(2, '0'); };
     return n.getFullYear() + '-' + p(n.getMonth() + 1) + '-' + p(n.getDate());
@@ -1019,28 +1031,157 @@
     var set = {}; keys.forEach(function (k) { set[k] = true; });
     document.querySelectorAll('.law-opt').forEach(function (c) { c.checked = !!set[c.getAttribute('data-key')]; });
   }
-  /* 举报渠道智能提示：指引式，不硬编码具体电话（仅 12345 全国通用） */
+  /* 城市区号（用于「区号+12345」；仅收录常用城市，未命中时回落到省会并提示核对） */
+  var CAPITALS = {
+    '北京市':'北京','天津市':'天津','河北省':'石家庄','山西省':'太原','内蒙古自治区':'呼和浩特',
+    '辽宁省':'沈阳','吉林省':'长春','黑龙江省':'哈尔滨','上海市':'上海','江苏省':'南京',
+    '浙江省':'杭州','安徽省':'合肥','福建省':'福州','江西省':'南昌','山东省':'济南',
+    '河南省':'郑州','湖北省':'武汉','湖南省':'长沙','广东省':'广州','广西壮族自治区':'南宁',
+    '海南省':'海口','重庆市':'重庆','四川省':'成都','贵州省':'贵阳','云南省':'昆明',
+    '西藏自治区':'拉萨','陕西省':'西安','甘肃省':'兰州','青海省':'西宁','宁夏回族自治区':'银川',
+    '新疆维吾尔自治区':'乌鲁木齐','台湾省':'台北','香港特别行政区':'香港','澳门特别行政区':'澳门'
+  };
+  var AREA_CODE = {
+    '北京':'010','上海':'021','天津':'022','重庆':'023','香港':'852','澳门':'853','台北':'886',
+    '广州':'020','深圳':'0755','珠海':'0756','汕头':'0754','佛山':'0757','东莞':'0769','中山':'0760',
+    '惠州':'0752','江门':'0750','湛江':'0759','肇庆':'0758','韶关':'0751','梅州':'0753','河源':'0762',
+    '清远':'0763','潮州':'0768','揭阳':'0663','茂名':'0668','阳江':'0662','云浮':'0766','汕尾':'0660',
+    '南京':'025','苏州':'0512','无锡':'0510','常州':'0519','南通':'0513','徐州':'0516','扬州':'0514',
+    '镇江':'0511','泰州':'0523','盐城':'0515','淮安':'0517','连云港':'0518','宿迁':'0527',
+    '杭州':'0571','宁波':'0574','温州':'0577','绍兴':'0575','嘉兴':'0573','金华':'0579','台州':'0576',
+    '湖州':'0572','衢州':'0570','丽水':'0578','舟山':'0580',
+    '合肥':'0551','芜湖':'0553','蚌埠':'0552','安庆':'0556','阜阳':'0558','淮南':'0554','马鞍山':'0555',
+    '淮北':'0561','铜陵':'0562','黄山':'0559','滁州':'0550','六安':'0564','宣城':'0563','池州':'0566',
+    '宿州':'0557','亳州':'0558',
+    '福州':'0591','厦门':'0592','泉州':'0595','漳州':'0596','莆田':'0594','三明':'0598','南平':'0599',
+    '龙岩':'0597','宁德':'0593',
+    '南昌':'0791','赣州':'0797','九江':'0792','上饶':'0793','抚州':'0794','宜春':'0795','吉安':'0796',
+    '景德镇':'0798','萍乡':'0799','新余':'0790','鹰潭':'0701',
+    '济南':'0531','青岛':'0532','淄博':'0533','德州':'0534','烟台':'0535','潍坊':'0536','济宁':'0537',
+    '泰安':'0538','临沂':'0539','菏泽':'0530','滨州':'0543','东营':'0546','威海':'0631','枣庄':'0632',
+    '日照':'0633',
+    '郑州':'0371','洛阳':'0379','开封':'0378','新乡':'0373','南阳':'0377','安阳':'0372','商丘':'0370',
+    '信阳':'0376','周口':'0394','驻马店':'0396','平顶山':'0375','焦作':'0391','许昌':'0374','濮阳':'0393',
+    '漯河':'0395','三门峡':'0398','鹤壁':'0392',
+    '武汉':'027','宜昌':'0717','襄阳':'0710','荆州':'0716','黄石':'0714','十堰':'0719','荆门':'0724',
+    '孝感':'0712','黄冈':'0713','咸宁':'0715','随州':'0722','鄂州':'0711','恩施':'0718',
+    '长沙':'0731','株洲':'0731','湘潭':'0731','衡阳':'0734','岳阳':'0730','常德':'0736','益阳':'0737',
+    '郴州':'0735','永州':'0746','邵阳':'0739','怀化':'0745','娄底':'0738','张家界':'0744',
+    '成都':'028','绵阳':'0816','德阳':'0838','宜宾':'0831','南充':'0817','泸州':'0830','自贡':'0813',
+    '内江':'0832','乐山':'0833','达州':'0818','遂宁':'0825','眉山':'028','资阳':'028','雅安':'0835',
+    '广元':'0839','巴中':'0827','攀枝花':'0812','广安':'0826','西昌':'0834',
+    '贵阳':'0851','昆明':'0871','曲靖':'0874','玉溪':'0877','大理':'0872','丽江':'0888','保山':'0875',
+    '昭通':'0870','普洱':'0879',
+    '西安':'029','宝鸡':'0917','咸阳':'029','渭南':'0913','汉中':'0916','榆林':'0912','延安':'0911',
+    '安康':'0915','商洛':'0914','铜川':'0919',
+    '兰州':'0931','天水':'0938','白银':'0943','酒泉':'0937','张掖':'0936','武威':'0935','平凉':'0933',
+    '庆阳':'0934','定西':'0932','陇南':'0939',
+    '西宁':'0971','海东':'0972','银川':'0951','石嘴山':'0952','吴忠':'0953','固原':'0954','中卫':'0955',
+    '乌鲁木齐':'0991','克拉玛依':'0990','吐鲁番':'0995','哈密':'0902','喀什':'0998','伊宁':'0999',
+    '阿克苏':'0997','库尔勒':'0996','石河子':'0993',
+    '呼和浩特':'0471','包头':'0472','乌海':'0473','赤峰':'0476','通辽':'0475','鄂尔多斯':'0477',
+    '海拉尔':'0470','巴彦淖尔':'0478','乌兰察布':'0474',
+    '沈阳':'024','大连':'0411','鞍山':'0412','本溪':'0414','丹东':'0415','锦州':'0416','营口':'0417',
+    '阜新':'0418','辽阳':'0419','盘锦':'0427','铁岭':'0410','朝阳':'0421','葫芦岛':'0429','抚顺':'024',
+    '长春':'0431','吉林':'0432','四平':'0434','通化':'0435','白山':'0439','松原':'0438','白城':'0436',
+    '延吉':'0433',
+    '哈尔滨':'0451','齐齐哈尔':'0452','牡丹江':'0453','佳木斯':'0454','大庆':'0459','鸡西':'0467',
+    '双鸭山':'0469','伊春':'0458','七台河':'0464','鹤岗':'0468','黑河':'0456','绥化':'0455',
+    '石家庄':'0311','唐山':'0315','秦皇岛':'0335','邯郸':'0310','邢台':'0319','保定':'0312','张家口':'0313',
+    '承德':'0314','沧州':'0317','廊坊':'0316','衡水':'0318',
+    '太原':'0351','大同':'0352','阳泉':'0353','长治':'0355','晋城':'0356','朔州':'0349','晋中':'0354',
+    '运城':'0359','忻州':'0350','临汾':'0357','吕梁':'0358',
+    '南宁':'0771','柳州':'0772','桂林':'0773','梧州':'0774','北海':'0779','防城港':'0770','钦州':'0777',
+    '贵港':'0775','玉林':'0775','百色':'0776','贺州':'0774','河池':'0778','来宾':'0772','崇左':'0771',
+    '海口':'0898','三亚':'0898','儋州':'0898',
+    '拉萨':'0891','日喀则':'0892','昌都':'0895','林芝':'0894','山南':'0893','那曲':'0896','阿里':'0897'
+  };
+  function deptOfProvince(p) {
+    if (/^(北京|上海|天津|重庆)/.test(p)) return p.replace(/市$/, '') + '市教育委员会';
+    return p + '教育厅';
+  }
+  function deptOfCity(c) {
+    c = (c || '').trim();
+    if (!c) return '';
+    return /市$/.test(c) ? c + '教育局' : c + '市教育局';
+  }
+  function areaCodeOf(p, city) {
+    var c = (city || '').replace(/(市|地区|盟|自治州|州)$/, '').trim();
+    if (c && AREA_CODE[c]) return { code: AREA_CODE[c], name: c, fallback: false };
+    var cap = CAPITALS[p];
+    if (cap && AREA_CODE[cap]) return { code: AREA_CODE[cap], name: cap, fallback: true };
+    return { code: '', name: '', fallback: true };
+  }
+  /* 生成电话 / 网络两项的默认文案：都标明对应部门 */
+  function buildChannelValues(p, city, hit) {
+    var deptP = deptOfProvince(p);
+    var ac = areaCodeOf(p, city);
+    var telParts = [];
+    if (ac.code) {
+      var cityName = city ? (city.replace(/市$/, '') + '市') : (ac.fallback ? (ac.name + '市') : p);
+      telParts.push(ac.code + '-12345（' + cityName + ' 12345 政务服务热线，可转教育局）');
+    }
+    else telParts.push('区号+12345（' + p + ' 12345 政务服务热线）');
+    if (hit && hit.tel) telParts.push(hit.tel + '（' + deptP + '举报电话）');
+    var net = '';
+    if (hit && hit.site) net = deptP + '举报平台：' + hit.site;
+    else if (hit && hit.mail) net = deptP + '举报邮箱：' + hit.mail;
+    else net = deptP + '官网 →「信访举报 / 违规办学举报」栏目';
+    if ((city || '').trim()) net += '；也可向' + deptOfCity(city) + '反映';
+    return { tel: telParts.join('；'), net: net, dept: deptP, ac: ac };
+  }
+  /* 自动填入电话 / 网络（只覆盖空白或上次自动填入的内容，手改的不动） */
+  var autoTel = '', autoNet = '';
+  function autoFillChannel(p, city, hit) {
+    var tel = $('f-tel'), net = $('f-net');
+    var telVal = (tel.value || '').trim(), netVal = (net.value || '').trim();
+    var vals = p ? buildChannelValues(p, city, hit) : { tel: '', net: '' };
+    if (!telVal || telVal === autoTel) {
+      if (vals.tel !== telVal) {
+        tel.value = vals.tel; autoTel = vals.tel;
+        tel.dispatchEvent(new Event('input', { bubbles: true }));
+      } else { autoTel = vals.tel; }
+    }
+    if (!netVal || netVal === autoNet) {
+      if (vals.net !== netVal) {
+        net.value = vals.net; autoNet = vals.net;
+        net.dispatchEvent(new Event('input', { bubbles: true }));
+      } else { autoNet = vals.net; }
+    }
+  }
   function updateChannelHint() {
     var p = $('f-province').value;
+    var city = ($('f-city').value || '').trim();
     var el = $('channel-hint');
-    if (!p) { el.style.display = 'none'; el.innerHTML = ''; return; }
+    if (!p) {
+      el.style.display = 'none'; el.innerHTML = '';
+      autoFillChannel('', '', null);
+      return;
+    }
     el.style.display = 'block';
     var hit = null;
     Object.keys(CHANNEL_LIB).forEach(function (k) { if (!hit && p.indexOf(k) === 0) hit = CHANNEL_LIB[k]; });
+    var vals = buildChannelValues(p, city, hit);
     var rows = [];
     if (hit) {
       var parts = [];
       if (hit.tel) parts.push('电话 <b>' + esc(hit.tel) + '</b>');
       if (hit.site) parts.push('网址 <a href="' + esc(hit.site) + '" target="_blank" rel="noopener">' + esc(hit.site) + '</a>');
       if (hit.mail) parts.push('邮箱 ' + esc(hit.mail));
-      rows.push('📍 <b>' + esc(p) + '</b> 中小学规范办学行为举报平台：' + parts.join('　'));
+      rows.push('📍 <b>' + esc(vals.dept) + '</b>举报平台：' + parts.join('　'));
     } else {
-      rows.push('📍 <b>' + esc(p) + '</b>：搜索「' + esc(p) + '教育厅（局）官网」→「信访举报 / 违规办学举报」栏目（未收录该省专门平台，以官网为准）。');
+      rows.push('📍 <b>' + esc(vals.dept) + '</b>：搜索「' + esc(p) + '教育厅（局）官网」→「信访举报 / 违规办学举报」栏目（未收录该省专门平台，以官网为准）。');
     }
+    if (vals.ac.code) {
+      rows.push('☎ 已按「' + esc(city || vals.ac.name + '市') + '」填入区号 <b>' + vals.ac.code + '</b>，电话写作 <b>' + vals.ac.code + '-12345</b>'
+        + (vals.ac.fallback && city ? '（未收录该市区号，暂按省会 ' + esc(vals.ac.name) + ' 计算，请核对后修改）' : ''));
+    }
+    rows.push('✅ 电话 / 网络两项已自动填入并注明所属部门，可直接改成自己的号码或网址');
     rows.push('① 拨打 <b>区号+12345</b> 政务服务热线（可匿名、约 15 个工作日；建议录音、问工号、要求保密）');
     rows.push('② 微信搜索「国务院」小程序 → 我要留言（实名，可选保密）');
     rows.push('③ 领导留言板 <a href="https://liuyan.people.com.cn" target="_blank" rel="noopener">liuyan.people.com.cn</a>');
     el.innerHTML = '建议逐级提交（以官方最新公布为准）：<br>' + rows.join('<br>');
+    autoFillChannel(p, city, hit);
   }
   function fillProvinces() {
     $('f-province').innerHTML = '<option value="">请选择省份</option>' + PROVINCES.map(function (p) {
@@ -1376,6 +1517,13 @@
       + '</div></div>';
   }
 
+  /* 导出文件名：学校名 + 日期，清理非法字符 */
+  function safeBase(d) {
+    var s = (d['f-school'] || '').trim() || '校园情况反映表';
+    s = s.replace(/[\\/:*?"<>|\r\n]+/g, '_').replace(/\s+/g, '_').slice(0, 40);
+    return s + '-' + today();
+  }
+
   function downloadImage(d) {
     var paperHTML = buildImagePaper(d);
     var measureDoc = '<!DOCTYPE html><html><head><meta charset="utf-8"><style>' + FONT_CSS + IMG_CSS
@@ -1397,28 +1545,32 @@
         + '</div></foreignObject></svg>';
       var img = new Image();
       img.onload = function () {
-        var c = document.createElement('canvas');
-        c.width = IMG_W * scale; c.height = H * scale;
-        var ctx = c.getContext('2d');
-        ctx.fillStyle = '#fff'; ctx.fillRect(0, 0, c.width, c.height);
-        ctx.drawImage(img, 0, 0, c.width, c.height);
-        var name = safeBase(d) + '.png';
-        var dataUrl = c.toDataURL('image/png');
-        if (window.Native && typeof window.Native.saveImage === 'function') {
-          try {
-            var ok = window.Native.saveImage(dataUrl.split(',')[1], name);
-            if (ok) { toast('图片已保存到相册', 'ok'); return; }
-          } catch (e) {}
+        try {
+          var c = document.createElement('canvas');
+          c.width = IMG_W * scale; c.height = H * scale;
+          var ctx = c.getContext('2d');
+          ctx.fillStyle = '#fff'; ctx.fillRect(0, 0, c.width, c.height);
+          ctx.drawImage(img, 0, 0, c.width, c.height);
+          var name = safeBase(d) + '.png';
+          var dataUrl = c.toDataURL('image/png');
+          if (window.Native && typeof window.Native.saveImage === 'function') {
+            try {
+              var ok = window.Native.saveImage(dataUrl.split(',')[1], name);
+              if (ok) { toast('图片已保存到相册', 'ok'); return; }
+            } catch (e) {}
+          }
+          var a = document.createElement('a');
+          a.href = dataUrl; a.download = name;
+          document.body.appendChild(a); a.click(); a.remove();
+          toast('已生成图片：' + name, 'ok');
+        } catch (e) {
+          toast('图片生成出错：' + (e && e.message ? e.message : '未知错误'), 'err');
         }
-        var a = document.createElement('a');
-        a.href = dataUrl; a.download = name;
-        document.body.appendChild(a); a.click(); a.remove();
-        toast('已生成图片：' + name, 'ok');
       };
       img.onerror = function () { toast('当前浏览器不支持生成图片，请改用截图', 'err'); };
+      /* 必须用 data: URI —— blob: 加载的 foreignObject SVG 会污染 canvas，导致 toDataURL 抛 SecurityError */
       try {
-        var blob = new Blob([svg], { type: 'image/svg+xml;charset=utf-8' });
-        img.src = URL.createObjectURL(blob);
+        img.src = 'data:image/svg+xml;base64,' + b64utf8(svg);
       } catch (e) {
         img.src = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svg);
       }
@@ -1433,6 +1585,7 @@
     if (!(d['f-school'] || '').trim()) add('学校', 'f-school');
     if (!(d['f-address'] || '').trim()) add('地址', 'f-address');
     if (!d.buke && !d.kaixue && !(d['f-type-other'] || '').trim()) add('类型（至少勾选一项或填「其他」）', 'f-type-other');
+    if ((d['f-type-other'] || '').trim() && !(d['f-other-desc'] || '').trim()) add('其他类型的行为描述', 'f-other-desc');
     if (d.buke) {
       if (!(d['bk-time'] || '').trim()) add('补课·时间', 'bk-time');
       if (!(d['bk-grade'] || '').trim()) add('补课·年级', 'bk-grade');
@@ -1772,7 +1925,7 @@
   });
   $('f-demands-custom').addEventListener('input', function () { composeDemands(); onInput(); });
   $('f-province').addEventListener('change', function () { onInput(); updateChannelHint(); });
-  $('f-city').addEventListener('input', function () { onInput(); });
+  $('f-city').addEventListener('input', function () { onInput(); updateChannelHint(); });
 
   /* ---------- 按钮 ---------- */
   $('btn-copy-plain').addEventListener('click', function () {
