@@ -11,12 +11,12 @@
 | --- | --- | --- |
 | 在线使用 | https://baoliaojiang.github.io/TutoringAppeal/ | 浏览器直接打开，无需下载 |
 | 单文件网页 | [index.html](index.html) | 下载后双击，离线可用 |
-| Android APK | [v1.0.0 下载](https://github.com/baoliaojiang/TutoringAppeal/releases/download/v1.0.0/TutoringAppeal-v1.0.0.apk) | WebView 离线壳，装好即用 |
+| Android APK | [v1.0.1 下载](https://github.com/baoliaojiang/TutoringAppeal/releases/download/v1.0.1/TutoringAppeal-v1.0.1.apk) | WebView 离线壳，装好即用，无任何权限 |
 
 > ⚠️ **免责声明**
 > 本工具仅作排版辅助，**非官方文书、不构成法律意见**；所有内容由你本人填写并对真实性负责；
 > 数据仅保存在你本机的浏览器（localStorage），**不上传任何服务器**；
-> 请基于事实、经教育主管部门官方渠道逐级提交。举报渠道参考 DCR 互助教程整理，以官方最新公布为准。
+> 请基于事实、经教育主管部门官方渠道逐级提交。举报渠道整理自各地教育部门公开信息，以官方最新公布为准。
 
 ## 功能
 
@@ -37,7 +37,8 @@
 ## 打包为 Android App
 
 `dist/校园反映小助手.apk` 为已签名的 WebView 壳应用（minSdk 21 / targetSdk 28，V1+V2+V3 签名）。
-安装后即可在手机上离线使用。正式下载入口见上方「下载」表格（Release 资产 `TutoringAppeal-v1.0.0.apk`）。
+体积约 70 KB，**不申请任何权限**（无网络、无存储、无设备信息），安装后即可在手机上离线使用。
+正式下载入口见上方「下载」表格（Release 资产 `TutoringAppeal-v1.0.1.apk`）。
 
 ## 隐私
 
@@ -45,6 +46,11 @@
 **删除草稿**：清除浏览器站点数据（设置 → 隐私 → 清除站点数据）即可。
 
 ## 更新日志
+
+**v1.0.1**（2026-11-06）
+- 优化表述：免责与渠道说明改得更中性简洁
+- 全新权限策略：APK 去掉网络权限，纯本地运行
+- 优化安装包：体积降至 70 KB，启动更快
 
 **v1.0.0**（2026-11-06）
 - 全新单文件网页：边填边排版，四种场景模板，多案例草稿
