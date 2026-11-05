@@ -1,0 +1,39 @@
+name: attach-apk
+
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "要挂载 APK 的 tag（如 v1.0.11）"
+        required: true
+        default: "v1.0.11"
+
+permissions:
+  contents: write
+
+jobs:
+  attach:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Resolve tag
+        id: t
+        run: |
+          TAG="${{ inputs.tag }}"
+          if [ -z "$TAG" ]; then TAG="${{ github.event.release.tag_name }}"; fi
+          echo "tag=$TAG" >> "$GITHUB_OUTPUT"
+          echo "using tag: $TAG"
+
+      - name: Download APK from Pages
+        run: |
+          curl -fL --retry 3 -o "TutoringAppeal-${{ steps.t.outputs.tag }}.apk" \
+            "https://baoliaojiang.github.io/TutoringAppeal/dist/%E6%A0%A1%E5%9B%AD%E5%8F%8D%E6%98%A0%E5%B0%8F%E5%8A%A9%E6%89%8B.apk"
+          ls -lh *.apk
+
+      - name: Upload to release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ steps.t.outputs.tag }}
+          files: TutoringAppeal-${{ steps.t.outputs.tag }}.apk
+          fail_on_unmatched_files: true
