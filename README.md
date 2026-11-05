@@ -5,6 +5,14 @@
 
 ![screenshot](screenshot.png)
 
+## 下载
+
+| 方式 | 地址 | 说明 |
+| --- | --- | --- |
+| 在线使用 | https://baoliaojiang.github.io/TutoringAppeal/ | 浏览器直接打开，无需下载 |
+| 单文件网页 | [index.html](index.html) | 下载后双击，离线可用 |
+| Android APK | [v1.0.0 下载](https://github.com/baoliaojiang/TutoringAppeal/releases/download/v1.0.0/TutoringAppeal-v1.0.0.apk) | WebView 离线壳，装好即用 |
+
 > ⚠️ **免责声明**
 > 本工具仅作排版辅助，**非官方文书、不构成法律意见**；所有内容由你本人填写并对真实性负责；
 > 数据仅保存在你本机的浏览器（localStorage），**不上传任何服务器**；
@@ -29,12 +37,21 @@
 ## 打包为 Android App
 
 `dist/校园反映小助手.apk` 为已签名的 WebView 壳应用（minSdk 21 / targetSdk 28，V1+V2+V3 签名）。
-安装后即可在手机上离线使用。
+安装后即可在手机上离线使用。正式下载入口见上方「下载」表格（Release 资产 `TutoringAppeal-v1.0.0.apk`）。
 
 ## 隐私
 
 全部数据仅存于浏览器 `localStorage`，不上传任何服务器。
 **删除草稿**：清除浏览器站点数据（设置 → 隐私 → 清除站点数据）即可。
+
+## 更新日志
+
+**v1.0.0**（2026-11-06）
+- 全新单文件网页：边填边排版，四种场景模板，多案例草稿
+- 全新上手体验：一键复制 / 导出 Word / 下载图片 / 打印 PDF
+- 全新举报入口：选省份直达当地举报平台电话、网址、邮箱
+- 全新移动端：手机单栏浏览，底部固定操作栏
+- 全新 APK：离线可用，草稿保存在本机
 
 ## 许可
 
