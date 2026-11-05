@@ -1323,6 +1323,13 @@
   /* ---------- PDF：直接打印「与预览完全一致」的那份 HTML ---------- */
   function printPDF(d) {
     var html = buildHTML(d);
+    if (window.Native && typeof window.Native.printHtml === 'function') {
+      try {
+        window.Native.printHtml(html);
+        toast('已打开系统打印，可另存为 PDF', 'ok');
+        return;
+      } catch (e) {}
+    }
     var f = document.createElement('iframe');
     f.setAttribute('title', 'pdf-render');
     f.style.cssText = 'position:fixed;left:-99999px;top:0;width:820px;height:1160px;border:0;';
@@ -1396,8 +1403,15 @@
         ctx.fillStyle = '#fff'; ctx.fillRect(0, 0, c.width, c.height);
         ctx.drawImage(img, 0, 0, c.width, c.height);
         var name = safeBase(d) + '.png';
+        var dataUrl = c.toDataURL('image/png');
+        if (window.Native && typeof window.Native.saveImage === 'function') {
+          try {
+            var ok = window.Native.saveImage(dataUrl.split(',')[1], name);
+            if (ok) { toast('图片已保存到相册', 'ok'); return; }
+          } catch (e) {}
+        }
         var a = document.createElement('a');
-        a.href = c.toDataURL('image/png'); a.download = name;
+        a.href = dataUrl; a.download = name;
         document.body.appendChild(a); a.click(); a.remove();
         toast('已生成图片：' + name, 'ok');
       };

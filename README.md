@@ -11,7 +11,7 @@
 | --- | --- | --- |
 | 在线使用 | https://baoliaojiang.github.io/TutoringAppeal/ | 浏览器直接打开，无需下载 |
 | 单文件网页 | [index.html](index.html) | 下载后双击，离线可用 |
-| Android APK | [v1.0.9 下载](https://github.com/baoliaojiang/TutoringAppeal/releases/download/v1.0.9/TutoringAppeal-v1.0.9.apk) | WebView 离线壳，装好即用，无任何权限 |
+| Android APK | [v1.0.10 下载](https://github.com/baoliaojiang/TutoringAppeal/releases/download/v1.0.10/TutoringAppeal-v1.0.10.apk) | WebView 离线壳，装好即用，无任何权限 |
 
 > ⚠️ **免责声明**
 > 本工具仅作排版辅助，**非官方文书、不构成法律意见**；所有内容由你本人填写并对真实性负责；
@@ -41,7 +41,7 @@
 
 `dist/校园反映小助手.apk` 为已签名的 WebView 壳应用（minSdk 21 / targetSdk 28，V1+V2+V3 签名）。
 体积约 2.9 MB（含内嵌字库），**不申请任何权限**（无网络、无存储、无设备信息），安装后即可在手机上离线使用。
-正式下载入口见上方「下载」表格（Release 资产 `TutoringAppeal-v1.0.9.apk`）。
+正式下载入口见上方「下载」表格（Release 资产 `TutoringAppeal-v1.0.10.apk`）。
 
 ## 隐私
 
@@ -49,6 +49,11 @@
 **删除草稿**：清除浏览器站点数据（设置 → 隐私 → 清除站点数据）即可。
 
 ## 更新日志
+
+**v1.0.10**（2026-11-06）
+- 优化 APK 导出：图片保存到「下载/TutoringAppeal」并直接弹出分享
+- 优化 APK 打印：PDF 走系统打印服务，可另存到任意位置
+- 优化权限说明：仅保存图片需要存储权限，首次保存时申请
 
 **v1.0.9**（2026-11-06）
 - 全新导出：下线 Word，改为 PDF 直出（与网页预览同一套版面）、复制文字、下载图片
@@ -105,6 +110,7 @@
 
 ## 合规说明
 
+- **权限**：仅「保存图片」需要存储权限（首次保存时申请），无网络权限
 - **不收集个人信息**：无账号、无服务器、无统计埋点，内容仅存本机浏览器（唯一例外是你主动发邮件申请授权，见隐私政策第七节）
 - **不含 AI 生成**：全部文字由填写人输入，工具只做排版；不涉及生成式 AI 备案要求
 - **未成年人**：面向家长与监护人，未满十四周岁须监护人同意后使用
