@@ -11,7 +11,7 @@
 | --- | --- | --- |
 | 在线使用 | https://baoliaojiang.github.io/TutoringAppeal/ | 浏览器直接打开，无需下载 |
 | 单文件网页 | [index.html](index.html) | 下载后双击，离线可用 |
-| Android APK | [v1.0.11 下载](https://github.com/baoliaojiang/TutoringAppeal/releases/download/v1.0.11/TutoringAppeal-v1.0.11.apk) | WebView 离线壳，装好即用，无任何权限 |
+| Android APK | [v1.0.11 下载](https://baoliaojiang.github.io/TutoringAppeal/dist/校园反映小助手.apk) | WebView 离线壳，装好即用，无任何权限 |
 
 > ⚠️ **免责声明**
 > 本工具仅作排版辅助，**非官方文书、不构成法律意见**；所有内容由你本人填写并对真实性负责；
@@ -41,7 +41,7 @@
 
 `dist/校园反映小助手.apk` 为已签名的 WebView 壳应用（minSdk 21 / targetSdk 28，V1+V2+V3 签名）。
 体积约 2.1 MB（含内嵌字库），**不申请任何权限**（无网络、无存储、无设备信息），安装后即可在手机上离线使用。
-正式下载入口见上方「下载」表格（Release 资产 `TutoringAppeal-v1.0.11.apk`）。
+正式下载入口见上方「下载」表格（直链始终指向最新版 APK，也可在 Releases 页面查看历史版本）。
 
 ## 隐私
 
