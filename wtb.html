@@ -6,7 +6,7 @@
 <title>校园反映小助手 · TutoringAppeal</title>
 <link rel="icon" type="image/png" href="icon-32.png">
 <meta name="application-name" content="校园反映小助手">
-<meta name="description" content="校园反映小助手：本地填写、自动排版，一键复制 / 导出 Word / 下载图片，数据不上传。">
+<meta name="description" content="校园反映小助手：本地填写、自动排版，一键复制 / 导出 PDF / 下载图片，数据不上传。">
 <script>
   /* 首屏前定主题，避免深浅色闪烁 */
   (function () {
@@ -152,6 +152,7 @@
   .btn:active { background: var(--fill); }
   .btn.primary { background: var(--primary); border-color: transparent; color: #fff; font-weight: 500; }
   .btn.primary:hover { background: var(--primary-hi); border-color: transparent; }
+  .btn .ic-logo { width: 18px; height: 18px; flex: 0 0 auto; }
   .btn .ic { width: 15px; height: 15px; vertical-align: -0.125em; stroke: currentColor; fill: none; }
   .btn:disabled { opacity: .45; cursor: not-allowed; }
   .only-m { display: none; }
@@ -348,8 +349,24 @@
   .action-row .btn { flex: 1; justify-content: center; min-width: 120px; height: 36px; }
 
   /* ---------- 移动端 ---------- */
+  /* 预览全屏（移动端） */
+  .pv-full-btn { display: none; margin-left: auto; border: 1px solid var(--border); background: var(--surface);
+    color: var(--text-2); font: inherit; font-size: 12.5px; padding: 5px 10px; border-radius: 999px; cursor: pointer; }
+  .preview.pv-full { position: fixed; inset: 0; z-index: 120; margin: 0; border-radius: 0; display: flex; flex-direction: column;
+    background: var(--bg); padding-top: env(safe-area-inset-top, 0px); }
+  .preview.pv-full .pv-body { flex: 1; height: auto; border-radius: 0; }
+  body.pv-locked { overflow: hidden; }
+
   @media (max-width: 980px) {
-    .bar { padding: 10px 14px; flex-wrap: wrap; }
+    .bar { padding: calc(10px + env(safe-area-inset-top, 0px)) 14px 10px; flex-wrap: wrap; }
+    .pv-full-btn { display: inline-flex; }
+    .preview.pv-full .pv-head { padding: 10px 14px; border-radius: 0; }
+    .check { min-height: 42px; font-size: 14px; }
+    .field label { font-size: 13.5px; }
+    .group-title { font-size: 13px; margin-top: 14px; }
+    .seg-btn { min-height: 38px; }
+    .tool-btn { min-height: 38px; }
+    .action-row .btn { height: 42px; }
     .bar .logo { width: 32px; height: 32px; }
     .bar h1 { font-size: 15px; }
     .bar .sub { display: none; }
@@ -377,6 +394,10 @@
     .pv-body { height: 70vh; min-height: 400px; padding: 8px; }
     #toast { top: auto; bottom: calc(96px + env(safe-area-inset-bottom, 0px)); right: 16px; }
     .disclaim-bar { padding: 6px 16px 2px; font-size: 11.5px; }
+    .bar-actions { gap: 6px; padding: 8px 10px calc(8px + env(safe-area-inset-bottom, 0px)); }
+    .bar-actions .btn { font-size: 13px; padding: 0 8px; gap: 4px; }
+    .bar-actions .btn .ic { width: 16px; height: 16px; }
+    .bar-actions .btn .ic-logo { width: 18px; height: 18px; }
     .agree-bar { padding: 1px 16px 6px; font-size: 11px; }
   }
 
@@ -447,6 +468,10 @@
   .legal-body p { font-size: 13px; line-height: 1.9; color: var(--text-2); margin: 0; white-space: pre-line; text-align: justify; }
   .legal-body p b { color: var(--warn-tx); font-weight: 600; }
   .legal-meta { padding: 10px 24px 16px; font-size: 11.5px; color: var(--text-3); border-top: 1px solid var(--border-split); }
+  @media (max-width: 400px) {
+    .bar-actions .only-m { min-width: 48px; padding: 0 10px; }
+    .bar-actions .btn span.bt-lbl { display: none; }
+  }
   @media (max-width: 560px) {
     .site-foot { padding: 14px 16px 26px; font-size: 12px; }
     .legal-box { max-height: 90vh; }
@@ -480,7 +505,7 @@
     </div>
     <div>
       <div class="title-row"><h1>校园反映小助手</h1><span class="brand-en">TutoringAppeal</span></div>
-      <div class="sub">内容手动填写 · 自动重新排版 · 复制 / 导出 Word / 下载图片</div>
+      <div class="sub">内容手动填写 · 自动重新排版 · 复制 / 导出 PDF / 下载图片</div>
     </div>
   </div>
   <div class="progress" id="progress">
@@ -491,21 +516,21 @@
   <div class="bar-actions">
     <button class="btn" id="btn-copy-plain">
       <svg class="ic" viewBox="0 0 24 24" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="11" height="11" rx="1.5"/><path d="M5 15H4a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v1"/></svg>
-      复制文本
+      <span class="bt-lbl">复制文本</span>
     </button>
-    <button class="btn" id="btn-word">
-      <svg class="ic" viewBox="0 0 24 24" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5"/></svg>
-      导出 Word
+    <button class="btn" id="btn-pdf">
+      <svg class="ic ic-logo" viewBox="0 0 32 32" fill="none" aria-hidden="true"><rect x="6.5" y="9.5" width="15" height="15" rx="3.6" fill="var(--logo-back)"/><rect x="9" y="7" width="15" height="15" rx="3.6" fill="var(--logo-mid)"/><path d="M15.1 4.5 H22.3 L26.5 8.7 V15.9 A3.6 3.6 0 0 1 22.9 19.5 H15.1 A3.6 3.6 0 0 1 11.5 15.9 V8.1 A3.6 3.6 0 0 1 15.1 4.5 Z" fill="var(--logo-front)"/><circle cx="24.4" cy="6.6" r="2.2" fill="var(--logo-dot)"/></svg>
+      <span class="bt-lbl">导出 PDF</span>
     </button>
     <button class="btn primary" id="btn-image">
-      <svg class="ic" viewBox="0 0 24 24" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12M8 11l4 4 4-4"/><path d="M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2"/></svg>
-      下载图片
+      <svg class="ic ic-logo" viewBox="0 0 32 32" fill="none" aria-hidden="true"><rect x="6.5" y="9.5" width="15" height="15" rx="3.6" fill="var(--logo-back)"/><rect x="9" y="7" width="15" height="15" rx="3.6" fill="var(--logo-mid)"/><path d="M15.1 4.5 H22.3 L26.5 8.7 V15.9 A3.6 3.6 0 0 1 22.9 19.5 H15.1 A3.6 3.6 0 0 1 11.5 15.9 V8.1 A3.6 3.6 0 0 1 15.1 4.5 Z" fill="var(--logo-front)"/><circle cx="24.4" cy="6.6" r="2.2" fill="var(--logo-dot)"/></svg>
+      <span class="bt-lbl">下载图片</span>
     </button>
     <button class="btn" id="btn-theme" title="切换深色 / 浅色" aria-label="切换深色与浅色模式">
       <svg class="ic ic-moon" viewBox="0 0 24 24" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" fill="none"><path d="M21 12.8A9 9 0 1 1 11.2 3 7 7 0 0 0 21 12.8z"/></svg>
       <svg class="ic ic-sun" viewBox="0 0 24 24" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" fill="none"><circle cx="12" cy="12" r="4.5"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>
     </button>
-    <button class="btn only-m" id="btn-jump">预览</button>
+    <button class="btn only-m" id="btn-jump"><svg class="ic ic-logo" viewBox="0 0 32 32" fill="none" aria-hidden="true"><rect x="6.5" y="9.5" width="15" height="15" rx="3.6" fill="var(--logo-back)"/><rect x="9" y="7" width="15" height="15" rx="3.6" fill="var(--logo-mid)"/><path d="M15.1 4.5 H22.3 L26.5 8.7 V15.9 A3.6 3.6 0 0 1 22.9 19.5 H15.1 A3.6 3.6 0 0 1 11.5 15.9 V8.1 A3.6 3.6 0 0 1 15.1 4.5 Z" fill="var(--logo-front)"/><circle cx="24.4" cy="6.6" r="2.2" fill="var(--logo-dot)"/></svg><span class="bt-lbl">预览</span></button>
   </div>
 </header>
 
@@ -728,12 +753,12 @@
   </div>
 
   <section class="preview">
-    <div class="pv-head"><b>网页预览</b><span>随填写自动更新 · 导出的正式排版</span></div>
+    <div class="pv-head"><b>网页预览</b><span>随填写自动更新 · 导出的正式排版</span><button type="button" class="pv-full-btn" id="btn-pv-full" aria-label="全屏查看成稿">全屏查看</button></div>
     <div class="pv-body"><iframe id="pv" title="生成页面预览"></iframe>
       <div class="pv-empty" id="pv-empty" style="display:none">
         <svg class="pv-e-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5"/><path d="M9 13h6M9 17h4"/></svg>
         <div class="pv-e-title">开始填写左侧表单</div>
-        <div class="pv-e-sub">右侧将实时生成正式排版 · 复制 / 导出 Word / 下载图片 / 打印 PDF</div>
+        <div class="pv-e-sub">右侧将实时生成正式排版 · 复制 / 导出 PDF / 下载图片 / 打印 PDF</div>
       </div>
     </div>
   </section>
@@ -840,13 +865,13 @@
 
   /* 导出文件页脚：项目仓库 + 二维码（图片/打印带码，文档带地址文本） */
   var FT_TEXT = '本内容由填写人自愿提供并对真实性负责 · 本工具仅在本地浏览器处理、数据不上传'
-    + '<br>自助模板非官方文书、不构成法律意见；<b>不能直接提交给有关部门</b>，须自行核实事实与证据、按属地渠道逐级反映'
-    + '<br>由「校园反映小助手」排版生成 · 项目仓库 ' + REPO_URL;
+    + '<br/>自助模板非官方文书、不构成法律意见；<b>不能直接提交给有关部门</b>，须自行核实事实与证据、按属地渠道逐级反映'
+    + '<br/>由「校园反映小助手」排版生成 · 项目仓库 ' + REPO_URL;
 
   function exportFooter(withQR) {
     if (!withQR) return '<div class="ft ft-plain"><div class="ft-t">' + FT_TEXT + '</div></div>';
     return '<div class="ft"><div class="ft-t">' + FT_TEXT + '</div>'
-      + '<div class="ft-q"><img src="data:image/png;base64,' + QR_B64 + '" width="64" height="64" alt="项目仓库二维码"><span>扫码查看源码</span></div>'
+      + '<div class="ft-q"><img src="data:image/png;base64,' + QR_B64 + '" width="64" height="64" alt="项目仓库二维码"/><span>扫码查看源码</span></div>'
       + '</div>';
   }
 
@@ -1292,66 +1317,37 @@
   /* ---------- Word (.docx) 导出 ----------
    * 纯前端方案：构造 MHT/HTML 复合文档（.doc），Office/WPS 可直接打开。
    * 相比 zip 式 .docx 更稳（免依赖库、跨浏览器一致），且排版还原度高。 */
-  function buildDoc(d) {
-    var b = buildSections(d, true);
-    var signer = (d['f-signer'] || '').trim();
-    var sig = '<p align="right" style="margin-top:30px;line-height:2;">'
-      + (signer ? '举报人：' + esc(signer) + '<br>' : '') + today() + '</p>';
-    var tamper = '<p style="margin-top:20px;border-top:1px dashed #ccc;padding-top:8px;font-size:10pt;color:#999;">'
-      + '本文件含内容校验编号 · ' + tamperNote() + '</p>';
-
-    var body = b.body.replace(/<div class="acts">/g, '<div>').replace(/<div class="channels">/g, '<div>');
-
-    return [
-      '<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:w="urn:schemas-microsoft-com:office:word" xmlns="http://www.w3.org/TR/REC-html40">',
-      '<head><meta charset="UTF-8"><title>' + esc(FIXED_TITLE) + '</title>',
-      '<style>'
-      + '@page{size:A4;margin:22mm 18mm}'
-      + 'body{font-family:"Tutoring Sans","Noto Sans SC","Source Han Sans SC",sans-serif;color:#1a1a1a;line-height:1.8;font-size:12pt}'
-      + 'h1{font-size:20pt;text-align:center;color:#1E8A6E;letter-spacing:2px;margin-bottom:8pt;font-weight:900}'
-      + '.meta{font-size:9pt;color:#888;text-align:center;margin-bottom:16pt}'
-      + '.notice{background:#f4faf7;border-left:4px solid #2BAE8C;padding:10pt 14pt;font-size:10.5pt;color:#14574A;margin-bottom:18pt}'
-      + 'section{margin-bottom:16pt} section h2{font-size:14pt;color:#111827;margin-bottom:10pt;padding-left:10pt;border-left:4px solid #2BAE8C}'
-      + 'table.info{border-collapse:collapse;width:100%;font-size:11pt} table.info th,table.info td{border:1px solid #cfd6d2;padding:8pt 12pt} table.info th{width:110pt;background:#f4faf7;font-weight:700}'
-      + '.act{background:#f6faf8;border:1px solid #e5e9f0;padding:10pt 14pt;margin-bottom:8pt} .act-t{font-weight:700;margin-bottom:4pt}'
-      + '.kv{line-height:1.8} .k{font-weight:700;color:#374151}'
-      + '.channel{background:#f6faf8;border:1px solid #e5e9f0;padding:8pt 14pt;margin-bottom:6pt} .c-label{font-weight:700}'
-      + 'ul.demands{list-style:none;padding-left:1.2em} ul.demands li{margin-bottom:6pt;text-indent:-1.2em}'
-      + 'a{color:#1E8A6E;text-decoration:none}'
-      + '.ft{margin-top:16pt;padding-top:9pt;border-top:1px solid #e5e7eb;text-align:center;line-height:1.75}'
-      + '.ft-t{font-size:8.5pt;color:#9ca3af}'
-      + '.ft-t b{color:#b45309}'
-      + '.ft-q{font-size:8pt;color:#9ca3af}'
-      + '</style></head><body>',
-      '<h1>' + esc(FIXED_TITLE) + '</h1><p class="meta">生成时间：' + today() + '</p>',
-      '<div class="notice">【声明】' + esc(FIXED_DECL) + '</div>',
-      b.body, sig, tamper,
-      exportFooter(false),
-      '</body></html>'
-    ].join('\n');
-  }
-
-  function safeBase(d) {
-    var base = (d['f-school'] || '').trim().replace(/[\\/:*?"<>|]/g, '') || FIXED_TITLE;
-    return base + '_' + today().replace(/-/g, '') + '_' + contentHash(JSON.stringify(d));
-  }
-
-  function downloadDoc(d) {
-    var html = buildDoc(d);
-    var mhtml = 'MIME-Version: 1.0\nContent-Transfer-Encoding: 8bit\nContent-Type: multipart/related; boundary="NEXT PART"; type="text/html"\n\n'
-      + '--NEXT PART\nContent-Type: text/html; charset="utf-8"\n\n' + html;
-    var blob = new Blob(['\ufeff' + mhtml], { type: 'application/msword;charset=utf-8' });
-    var name = safeBase(d) + '.doc';
-    saveBlob(blob, name);
-    toast('已导出 Word：' + name, 'ok');
-  }
-  function saveBlob(blob, name) {
-    var a = document.createElement('a');
-    a.href = URL.createObjectURL(blob);
-    a.download = name;
-    document.body.appendChild(a);
-    a.click();
-    setTimeout(function () { URL.revokeObjectURL(a.href); a.remove(); }, 1500);
+  /* ---------- PDF：直接打印「与预览完全一致」的那份 HTML ---------- */
+  function printPDF(d) {
+    var html = buildHTML(d);
+    var f = document.createElement('iframe');
+    f.setAttribute('title', 'pdf-render');
+    f.style.cssText = 'position:fixed;left:-99999px;top:0;width:820px;height:1160px;border:0;';
+    f.srcdoc = html;
+    f.onload = function () {
+      var w = f.contentWindow;
+      var fired = false;
+      function fire() {
+        if (fired) return;
+        fired = true;
+        if (!w || typeof w.print !== 'function') {
+          toast('当前环境不支持直接打印，请改用「下载图片」', 'err');
+          f.remove();
+          return;
+        }
+        try { w.focus(); w.print(); } catch (e) { toast('打印被浏览器拦截，请改用「下载图片」', 'err'); }
+        setTimeout(function () { f.remove(); }, 60000);
+      }
+      try {
+        if (w.document.fonts && w.document.fonts.ready) {
+          w.document.fonts.ready.then(function () { setTimeout(fire, 150); });
+        } else {
+          setTimeout(fire, 400);
+        }
+      } catch (e) { setTimeout(fire, 400); }
+    };
+    document.body.appendChild(f);
+    toast('正在准备 PDF，稍后在打印窗口选择「另存为 PDF」', 'ok');
   }
 
   /* ---------- 图片版（SVG foreignObject + Canvas，纯前端） ---------- */
@@ -1769,12 +1765,21 @@
     });
   });
 
-  $('btn-word').addEventListener('click', function () {
-    gateCheck(function () { downloadDoc(collect()); });
+  $('btn-pdf').addEventListener('click', function () {
+    gateCheck(function () { printPDF(collect()); });
   });
 
   $('btn-image').addEventListener('click', function () {
     gateCheck(function () { toast('正在生成图片…'); downloadImage(collect()); });
+  });
+
+  $('btn-pv-full').addEventListener('click', function () {
+    var pvEl = document.querySelector('.preview');
+    if (!pvEl) return;
+    var on = pvEl.classList.toggle('pv-full');
+    document.body.classList.toggle('pv-locked', on);
+    this.textContent = on ? '退出全屏' : '全屏查看';
+    if (on && pvEl.scrollIntoView) pvEl.scrollIntoView({ block: 'start' });
   });
 
   $('btn-jump').addEventListener('click', function () {
@@ -1950,6 +1955,12 @@
     if (!$('consent-modal').hidden) closeConsent();
   });
   $('consent-modal').addEventListener('click', function (e) { if (e.target === this) closeConsent(); });
+
+
+
+
+
+
 
   updateChannelHint();
   refresh();
