@@ -1,0 +1,1696 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>校园反映小助手 · TutoringAppeal</title>
+<link rel="icon" type="image/png" href="icon-32.png">
+<meta name="application-name" content="校园反映小助手">
+<meta name="description" content="校园反映小助手：本地填写、自动排版，一键复制 / 导出 Word / 下载图片，数据不上传。">
+<script>
+  /* 首屏前定主题，避免深浅色闪烁 */
+  (function () {
+    try {
+      var t = localStorage.getItem('jubao-page-theme-v1');
+      if (!t) t = 'dark';
+      document.documentElement.setAttribute('data-theme', t);
+    } catch (e) {}
+  })();
+</script>
+<style>
+  :root {
+    /* 中性灰阶（承载 90% 界面）—— B 端浅色 */
+    --text-1:   rgba(17,24,39,0.92);
+    --text-2:   rgba(17,24,39,0.56);
+    --text-3:   rgba(17,24,39,0.40);
+    --border:         rgba(17,24,39,0.14);
+    --border-split:   rgba(17,24,39,0.08);
+    --fill:       #E4E7EC;
+    --fill-in:    #D8DCE2;
+    --bg:         #EEF0F3;   /* 页面底 / 顶栏 */
+    --surface:    #FFFFFF;   /* 卡片 / 面板 */
+
+    /* 功能色：绿色（贴合求助/可操作语义，克制使用 ≤5%） */
+    --primary:       #2563EB;
+    --primary-hi:    #3B82F6;
+    --primary-soft:  rgba(37,99,235,0.12);
+    --primary-line:  rgba(37,99,235,0.30);
+
+    /* 状态色（仅语义，不装饰） */
+    --ok:   #16A34A;  --ok-bg: #ECFDF3;  --ok-tx: #15803D;
+    --warn: #D97706;  --warn-bg:#FFFBEB;  --warn-tx:#B45309;
+    --err:  #DC2626;  --err-bg:#FEF2F2;  --err-tx:#B91C1C;
+    --info: #2563EB;  --info-bg:rgba(37,99,235,0.12); --info-tx:#1D4ED8;
+
+    /* 圆角收敛（禁 >8px） */
+    --r-tag: 4px;
+    --r-md: 10px;
+    --r-ctrl: 12px;
+    --r-card: 16px;
+
+    /* 阴影轻量化 */
+    --sh-card: none;
+    --sh-pop:  0 10px 30px rgba(17,24,39,0.12);
+    --hover-bd: #C4C9D0;
+    /* logo 三层堆叠色（浅色：灰→近黑） */
+    --logo-back:#E2E2E8; --logo-mid:#9B9BA4; --logo-front:#17171A; --logo-dot:#2563EB;
+  }
+
+  /* 深色模式（StudyMate 暗色规范：黑→深灰→蓝点缀，靠明度分层） */
+  html[data-theme="dark"] {
+    --text-1:   #F5F5F5;
+    --text-2:   #9CA3AF;
+    --text-3:   #6B7280;
+    --border:         rgba(255,255,255,0.10);
+    --border-split:   rgba(255,255,255,0.06);
+    --fill:          #1C1C1E;
+    --fill-in:       #262629;
+    --bg:            #0A0A0A;
+    --surface:       #141414;
+    --primary:       #3B82F6;
+    --primary-hi:    #60A5FA;
+    --primary-soft:  rgba(59,130,246,0.18);
+    --primary-line:  rgba(59,130,246,0.42);
+    --ok: #22C55E;   --ok-bg: #0E1A12;  --ok-tx: #4ADE80;
+    --warn: #F59E0B; --warn-bg:#1F1606;  --warn-tx:#FBBF24;
+    --err: #EF4444;  --err-bg:#1F1213;   --err-tx:#F87171;
+    --info: #3B82F6; --info-bg:rgba(59,130,246,0.16); --info-tx:#93C5FD;
+    --sh-card: none;
+    --sh-pop:  0 12px 32px rgba(0,0,0,0.55);
+    --hover-bd: rgba(255,255,255,0.22);
+    /* logo 三层堆叠色（深色反相：深灰→近白，蓝点提亮） */
+    --logo-back:#2A2A2F; --logo-mid:#46464E; --logo-front:#ECECF0; --logo-dot:#3B82F6;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html { -webkit-text-size-adjust: 100%; }
+  body {
+    font-family: -apple-system, "Segoe UI", "Microsoft YaHei", "PingFang SC", "Helvetica Neue", Arial, sans-serif;
+    background: var(--bg);
+    color: var(--text-1);
+    -webkit-tap-highlight-color: transparent;
+    line-height: 1.5;
+    /* 字号层级：正文 14px，行高 1.5 */
+    font-size: 14px;
+    /* 防孤字 */
+    text-wrap: pretty;
+    /* 数字等宽防抖（进度百分比、金额、编号） */
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* ---------- 顶栏 ---------- */
+  .bar {
+    position: sticky; top: 0; z-index: 20;
+    display: flex; align-items: center; justify-content: space-between; gap: 16px;
+    padding: 12px 24px;
+    background: var(--bg);
+    border-bottom: 1px solid var(--border-split);
+    box-shadow: none;
+  }
+  .bar-left { display: flex; align-items: center; gap: 12px; min-width: 0; }
+  .logo {
+    flex: none; width: 36px; height: 36px; border-radius: var(--r-ctrl);
+    background: var(--surface);
+    display: flex; align-items: center; justify-content: center;
+  }
+  .logo svg { width: 24px; height: 24px; }
+  .bar h1 { font-size: 16px; font-weight: 600; color: var(--text-1); line-height: 1.4; }
+  .brand-en {
+    font-size: 12px; font-weight: 500; color: var(--text-3);
+    border: 1px solid var(--border); border-radius: var(--r-tag);
+    padding: 1px 8px; margin-left: 10px; letter-spacing: .3px;
+    white-space: nowrap;
+  }
+  .bar .sub { font-size: 12px; color: var(--text-3); margin-top: 2px; }
+
+  /* 进度条（B 端：细、静态、灰底） */
+  .progress { display: flex; align-items: center; gap: 8px; min-width: 0; }
+  .progress .track {
+    width: 104px; height: 6px; border-radius: 3px;
+    background: var(--fill); overflow: hidden;
+  }
+  .progress .fill {
+    height: 100%; width: 0%; border-radius: 3px;
+    background: var(--primary); transition: width .3s ease;
+  }
+  .progress .pct { font-size: 12px; color: var(--text-2); min-width: 34px; }
+  .progress .lbl { font-size: 12px; color: var(--text-3); }
+  .progress .lbl.ready { color: var(--ok-tx); }
+
+  .bar-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+
+  /* ---------- 按钮（B 端：次按钮为主，主按钮唯一） ---------- */
+  .btn {
+    border: 1px solid transparent; background: var(--fill); color: var(--text-1);
+    padding: 6px 16px; border-radius: var(--r-ctrl); font-size: 13px; cursor: pointer;
+    transition: background .15s, color .15s; font-family: inherit;
+    display: inline-flex; align-items: center; gap: 6px; white-space: nowrap; height: 32px;
+  }
+  .btn:hover { background: var(--fill-in); }
+  .btn:active { background: var(--fill); }
+  .btn.primary { background: var(--primary); border-color: transparent; color: #fff; font-weight: 500; }
+  .btn.primary:hover { background: var(--primary-hi); border-color: transparent; }
+  .btn .ic { width: 15px; height: 15px; vertical-align: -0.125em; stroke: currentColor; fill: none; }
+  .btn:disabled { opacity: .45; cursor: not-allowed; }
+  .only-m { display: none; }
+
+  /* 场景 / 案例工具条 */
+  .panel-tools { margin-bottom: 20px; }
+  .tool-row { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+  .tool-row + .tool-row { margin-top: 10px; }
+  .tool-label { font-size: 12px; color: var(--text-3); flex: none; }
+  .seg { display: inline-flex; background: var(--bg); border: 1px solid var(--border-split); border-radius: var(--r-ctrl); padding: 3px; gap: 2px; }
+  .seg-btn { border: 0; background: transparent; color: var(--text-2); font-size: 13px; padding: 5px 14px; border-radius: calc(var(--r-ctrl) - 4px); cursor: pointer; font-family: inherit; transition: .15s; white-space: nowrap; }
+  .seg-btn:hover { color: var(--text-1); }
+  .seg-btn.on { background: var(--fill-in); color: var(--primary); font-weight: 500; }
+  .case-sel { flex: 1; min-width: 160px; height: 32px; border: 1px solid var(--border); border-radius: var(--r-ctrl); padding: 0 10px; font-size: 13px; font-family: inherit; color: var(--text-1); background: var(--surface); }
+  .tool-btn { height: 32px; padding: 0 12px; border: 1px solid var(--border); background: var(--surface); color: var(--text-1); border-radius: var(--r-ctrl); font-size: 13px; cursor: pointer; font-family: inherit; transition: .15s; white-space: nowrap; }
+  .tool-btn:hover { background: var(--fill-in); border-color: var(--hover-bd); }
+  .tool-btn.danger:hover { color: var(--err); border-color: var(--err); background: var(--err-bg); }
+  .tool-btn.armed { color: #fff; border-color: var(--err); background: var(--err); }
+  .tool-hint { font-size: 12px; color: var(--text-3); }
+
+  /* 主题切换：浅色显月（点→暗），深色显日（点→亮） */
+  .ic-sun { display: none; }
+  html[data-theme="dark"] .ic-sun { display: inline-block; }
+  html[data-theme="dark"] .ic-moon { display: none; }
+
+  /* ---------- 主布局 ---------- */
+  main {
+    display: grid; grid-template-columns: 480px 1fr; gap: 18px;
+    padding: 18px 24px 28px; max-width: 1560px; margin: 0 auto; align-items: start;
+  }
+
+  .panel {
+    background: var(--surface); border-radius: var(--r-card);
+    border: none; box-shadow: none;
+    padding: 24px;
+  }
+
+  .fixed-head {
+    background: var(--fill-in); border: 1px solid var(--border-split);
+    border-radius: var(--r-md); padding: 12px 16px; margin-bottom: 24px;
+    font-size: 12px; color: var(--text-3); line-height: 1.8;
+  }
+  .fixed-head b { display: block; color: var(--text-2); margin-bottom: 4px; font-size: 12px; font-weight: 500; }
+
+  .group-title {
+    font-size: 13px; color: var(--text-2); font-weight: 500;
+    letter-spacing: 0; margin: 0 0 12px;
+  }
+  .group-title::before {
+    content: ""; display: inline-block; width: 3px; height: 13px;
+    background: var(--primary); border-radius: 2px; margin-right: 8px;
+    vertical-align: -2px;
+  }
+  .sep { border: none; border-top: 1px solid var(--border-split); margin: 24px 0; }
+
+  .field { margin-bottom: 16px; }
+  .field > label { display: block; font-size: 13px; font-weight: 400; color: var(--text-2); margin-bottom: 6px; }
+  .field > label .opt { font-weight: 400; color: var(--text-3); font-size: 12px; margin-left: 6px; }
+  .field > label .req { color: var(--err); margin-left: 4px; font-weight: 400; }
+
+  .field input[type="text"], .field textarea {
+    width: 100%; border: none; border-radius: var(--r-md);
+    padding: 0 12px; font-size: 14px; font-family: inherit; height: 32px;
+    color: var(--text-1); background: var(--fill);
+    transition: box-shadow .15s;
+  }
+  .field input::placeholder, .field textarea::placeholder { color: var(--text-3); }
+  .field textarea { resize: vertical; line-height: 1.6; height: auto; min-height: 64px; padding: 8px 12px; }
+  /* 聚焦：主色双环（保留铁律②，B 端语义） */
+  .field input:focus, .field textarea:focus {
+    outline: none;
+    border-color: var(--primary);
+    box-shadow: 0 0 0 2px var(--primary-soft), 0 0 0 1px var(--primary);
+  }
+  .field .hint { font-size: 12px; color: var(--text-3); margin-top: 4px; line-height: 1.5; }
+
+  /* 必填校验态 */
+  .field.invalid input[type="text"], .field.invalid textarea { border-color: var(--err); }
+  .field.invalid input:focus, .field.invalid textarea:focus { box-shadow: 0 0 0 2px var(--err-bg), 0 0 0 1px var(--err); }
+
+  .checks { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 12px; }
+  .demand-opts { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 10px; }
+  .demand-opts .check { flex: 1 1 auto; }
+  .field-row { display: flex; gap: 12px; }
+  .field-row .field { flex: 1; margin-bottom: 14px; }
+  .field select {
+    width: 100%; border: none; border-radius: var(--r-md);
+    padding: 10px 13px; font-size: 14px; font-family: inherit; color: var(--text-1);
+    background: var(--fill); transition: box-shadow .15s;
+  }
+  .field select:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 3px var(--primary-soft), 0 0 0 1px var(--primary); }
+  .channel-hint {
+    display: none; margin: 2px 0 14px; padding: 12px 14px; border-radius: var(--r-md);
+    background: var(--primary-soft); border: 1px solid var(--primary-line); border-left: 3px solid var(--primary);
+    font-size: 12.5px; color: var(--text-2); line-height: 1.7;
+  }
+  .channel-hint b { color: var(--primary); }
+  .channel-hint a { color: var(--primary); text-decoration: underline; word-break: break-all; }
+  .check {
+    display: inline-flex; align-items: center; gap: 8px;
+    padding: 0 12px; height: 32px; border-radius: var(--r-md); font-size: 13px; color: var(--text-1);
+    cursor: pointer; user-select: none;
+    background: var(--fill); border: 1px solid transparent;
+    transition: border-color .15s, background .15s;
+  }
+  .check input { position: absolute; opacity: 0; pointer-events: none; }
+  .check .box {
+    width: 16px; height: 16px; border-radius: var(--r-tag); border: 1px solid var(--border);
+    display: flex; align-items: center; justify-content: center; flex: none;
+    font-size: 11px; color: #fff; background: var(--surface); transition: background .15s, border-color .15s;
+  }
+  .check .box::after { content: ""; width: 9px; height: 5px; border-left: 2px solid #fff; border-bottom: 2px solid #fff;
+    transform: rotate(-45deg); opacity: 0; margin-top: -2px; }
+  .check .dot { width: 16px; height: 16px; border-radius: 50%; border: 1px solid var(--border);
+    display: flex; align-items: center; justify-content: center; flex: none; transition: border-color .15s; }
+  .check .dot::after { content: ""; width: 8px; height: 8px; border-radius: 50%; background: var(--surface); transition: background .15s; }
+  .check:hover { border-color: #bfbfbf; }
+  .check.on { background: var(--primary-soft); border-color: var(--primary-line); color: var(--text-1); }
+  .check.on .box { background: var(--primary); border-color: var(--primary); }
+  .check.on .box::after { opacity: 1; }
+  .check.on .dot { border-color: var(--primary); }
+  .check.on .dot::after { background: var(--primary); }
+
+  /* 行为子块（Grid 0fr→1fr 丝滑折叠，铁律⑦保留） */
+  .subblk { margin: 8px 0 16px; overflow: hidden; transition: opacity .25s; opacity: 1; }
+  .subblk .inner {
+    background: var(--fill); border: none;
+    border-left: 3px solid var(--primary-line);
+    border-radius: var(--r-md); padding: 16px;
+  }
+  .subblk .inner .group-title { margin-bottom: 12px; }
+  .collapse { display: grid; grid-template-rows: 0fr; transition: grid-template-rows .3s ease; }
+  .collapse > .cwrap { overflow: hidden; min-height: 0; }
+  .collapse.open { grid-template-rows: 1fr; }
+
+  .clear-btn {
+    width: 100%; margin-top: 8px; padding: 0; height: 32px; border-radius: var(--r-ctrl);
+    border: 1px solid var(--border-split); background: var(--fill);
+    color: var(--text-2); font-size: 13px; cursor: pointer; font-family: inherit; transition: .15s;
+  }
+  .clear-btn:hover { color: var(--err); border-color: var(--err); background: var(--err-bg); }
+
+  /* ---------- 预览 ---------- */
+  .preview { position: sticky; top: 76px; display: flex; flex-direction: column; }
+  .pv-head { display: flex; align-items: baseline; gap: 8px; padding: 0 4px 12px; }
+  .pv-head b { font-size: 14px; color: var(--text-1); font-weight: 500; }
+  .pv-head span { font-size: 12px; color: var(--text-3); }
+  .pv-body {
+    position: relative;
+    height: calc(100vh - 140px); min-height: 520px;
+    background: var(--bg); border-radius: var(--r-card);
+    padding: 12px; border: 1px solid var(--border-split);
+  }
+  /* 预览空状态（无内容时居中引导，避免右侧一片空白） */
+  .pv-empty {
+    position: absolute; inset: 0; display: none; flex-direction: column;
+    align-items: center; justify-content: center; gap: 10px; text-align: center;
+    background: var(--bg); color: var(--text-3); padding: 24px;
+  }
+  .pv-empty .pv-e-ic { width: 40px; height: 40px; opacity: .45; }
+  .pv-empty .pv-e-title { font-size: 15px; color: var(--text-2); font-weight: 500; }
+  .pv-empty .pv-e-sub { font-size: 12.5px; color: var(--text-3); line-height: 1.7; max-width: 260px; }
+  .pv-body iframe { width: 100%; height: 100%; border: 0; border-radius: var(--r-md); background: #fff; }
+
+  /* ---------- Toast（B 端：顶部右侧浮层，自熄） ---------- */
+  #toast {
+    position: fixed; top: 64px; right: 24px; transform: translateX(120%);
+    background: var(--surface); color: var(--text-1);
+    border: 1px solid var(--border-split); border-left: 3px solid var(--primary);
+    padding: 10px 16px; border-radius: var(--r-md); font-size: 13px;
+    opacity: 0; pointer-events: none; transition: .3s ease; z-index: 50;
+    box-shadow: var(--sh-pop); max-width: 360px;
+  }
+  #toast.show { opacity: 1; transform: translateX(0); }
+  #toast.ok { border-left-color: var(--ok); }
+  #toast .tick { display: inline-block; vertical-align: -0.125em; margin-right: 6px; color: var(--text-1); stroke: currentColor; }
+  #toast.ok .tick { color: var(--ok-tx); }
+  #toast.warn { border-left-color: var(--warn); }
+  #toast.err { border-left-color: var(--err); }
+
+  /* ---------- 校验提示条（B 端 Alert） ---------- */
+  .validate-bar {
+    margin: 0 0 20px; border-radius: var(--r-md); padding: 10px 14px;
+    background: var(--warn-bg); border: 1px solid var(--warn); border-left: 3px solid var(--warn);
+    font-size: 13px; color: var(--text-2); line-height: 1.7; display: none;
+  }
+  .validate-bar b { color: var(--warn-tx); font-weight: 500; }
+  .validate-bar ul { margin: 6px 0 0 18px; }
+  .validate-bar li { color: var(--text-2); }
+  .validate-bar.show { display: block; }
+
+  /* 操作区 */
+  .action-row { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 8px; }
+  .action-row .btn { flex: 1; justify-content: center; min-width: 120px; height: 36px; }
+
+  /* ---------- 移动端 ---------- */
+  @media (max-width: 980px) {
+    .bar { padding: 10px 14px; flex-wrap: wrap; }
+    .bar .logo { width: 32px; height: 32px; }
+    .bar h1 { font-size: 15px; }
+    .bar .sub { display: none; }
+    .progress { order: 3; width: 100%; margin-top: 4px; }
+    .progress .track { flex: 1; }
+    .bar-actions {
+      position: fixed; left: 0; right: 0; bottom: 0; z-index: 30;
+      display: flex; gap: 8px; padding: 10px 12px calc(10px + env(safe-area-inset-bottom, 0px));
+      background: var(--bg); box-shadow: 0 -2px 8px rgba(0,0,0,.12);
+      border-top: 1px solid var(--border-split);
+    }
+    .bar-actions .btn { background: var(--surface); }
+    .bar-actions .btn:hover { background: var(--fill-in); }
+    .bar-actions .btn { flex: 1; min-height: 44px; font-size: 14px; height: 44px; }
+    .bar-actions .btn.primary { flex: 1.3; }
+    .bar-actions .only-m { display: inline-flex; flex: 0 0 auto; min-width: 60px; background: var(--fill); }
+    main { grid-template-columns: 1fr; padding: 16px 16px calc(96px + env(safe-area-inset-bottom, 0px)); }
+    .panel { padding: 16px; }
+    .tool-row { gap: 8px; }
+    .case-sel { flex: 1 1 100%; min-width: 0; }
+    .field input[type="text"], .field textarea { font-size: 16px; height: 44px; }
+    .field textarea { height: auto; }
+    .preview { position: static; }
+    .pv-head span { display: none; }
+    .pv-body { height: 70vh; min-height: 400px; padding: 8px; }
+    #toast { top: auto; bottom: calc(96px + env(safe-area-inset-bottom, 0px)); right: 16px; }
+    .disclaim-bar { padding: 6px 16px; font-size: 11.5px; }
+  }
+
+  /* ---------- 举报途径：可展开的具体入口 ---------- */
+  .online-help {
+    margin: 4px 0 16px; border-radius: var(--r-md); background: var(--fill);
+    padding: 10px 14px; font-size: 13px; color: var(--text-2); line-height: 1.6;
+  }
+  .online-help summary { cursor: pointer; font-weight: 500; color: var(--text-1); list-style: none; }
+  .online-help summary::-webkit-details-marker { display: none; }
+  .online-help summary::before { content: "▸ "; color: var(--primary); }
+  .online-help[open] summary::before { content: "▾ "; }
+  .online-help ul { margin: 10px 0 0; padding-left: 18px; line-height: 1.9; }
+  .online-help li { margin-bottom: 4px; }
+  .online-help a { color: var(--primary); text-decoration: none; border-bottom: 1px solid var(--primary-line); word-break: break-all; }
+  .online-help .oh-note { margin-top: 10px; font-size: 12px; color: var(--text-3); }
+
+  /* ---------- 顶部免责声明条 ---------- */
+  .disclaim-bar {
+    padding: 6px 24px; font-size: 12px; line-height: 1.6; text-align: center;
+    color: var(--text-3); background: var(--surface); border-bottom: 1px solid var(--border-split);
+  }
+  .disclaim-bar b { color: var(--text-2); font-weight: 500; }
+
+  /* ---------- 自定义确认弹层（替代原生 confirm，预览/APK 可用） ---------- */
+  .ui-modal { position: fixed; inset: 0; z-index: 200; display: flex; align-items: center; justify-content: center; padding: 20px; background: rgba(0,0,0,0.45); }
+  .ui-modal[hidden] { display: none; }
+  .ui-modal-box { background: var(--surface); border-radius: var(--r-card); padding: 20px 20px 16px; max-width: 380px; width: 100%; box-shadow: var(--sh-pop); }
+  .ui-modal-msg { font-size: 14px; color: var(--text-1); line-height: 1.75; white-space: pre-line; margin-bottom: 18px; }
+  .ui-modal-actions { display: flex; gap: 8px; justify-content: flex-end; }
+</style>
+</head>
+<body>
+
+<header class="bar">
+  <div class="bar-left">
+    <div class="logo" aria-hidden="true">
+      <svg viewBox="0 0 32 32" fill="none">
+        <rect x="6.5" y="9.5" width="15" height="15" rx="3.6" fill="var(--logo-back)"/>
+        <rect x="9" y="7" width="15" height="15" rx="3.6" fill="var(--logo-mid)"/>
+        <path d="M15.1 4.5 H22.3 L26.5 8.7 V15.9 A3.6 3.6 0 0 1 22.9 19.5 H15.1 A3.6 3.6 0 0 1 11.5 15.9 V8.1 A3.6 3.6 0 0 1 15.1 4.5 Z" fill="var(--logo-front)"/>
+        <circle cx="24.4" cy="6.6" r="2.2" fill="var(--logo-dot)"/>
+      </svg>
+    </div>
+    <div>
+      <div class="title-row"><h1>校园反映小助手</h1><span class="brand-en">TutoringAppeal</span></div>
+      <div class="sub">内容手动填写 · 自动重新排版 · 复制 / 导出 Word / 下载图片</div>
+    </div>
+  </div>
+  <div class="progress" id="progress">
+    <div class="track"><div class="fill" id="pfill"></div></div>
+    <div class="pct" id="pct">0%</div>
+    <div class="lbl" id="plbl">待填写</div>
+  </div>
+  <div class="bar-actions">
+    <button class="btn" id="btn-copy-plain">
+      <svg class="ic" viewBox="0 0 24 24" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="11" height="11" rx="1.5"/><path d="M5 15H4a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v1"/></svg>
+      复制文本
+    </button>
+    <button class="btn" id="btn-word">
+      <svg class="ic" viewBox="0 0 24 24" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5"/></svg>
+      导出 Word
+    </button>
+    <button class="btn primary" id="btn-image">
+      <svg class="ic" viewBox="0 0 24 24" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12M8 11l4 4 4-4"/><path d="M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2"/></svg>
+      下载图片
+    </button>
+    <button class="btn" id="btn-theme" title="切换深色 / 浅色" aria-label="切换深色与浅色模式">
+      <svg class="ic ic-moon" viewBox="0 0 24 24" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" fill="none"><path d="M21 12.8A9 9 0 1 1 11.2 3 7 7 0 0 0 21 12.8z"/></svg>
+      <svg class="ic ic-sun" viewBox="0 0 24 24" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" fill="none"><circle cx="12" cy="12" r="4.5"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>
+    </button>
+    <button class="btn only-m" id="btn-jump">预览</button>
+  </div>
+</header>
+
+<div class="disclaim-bar"><b>免责声明：</b>本工具仅作排版辅助，非官方文书、不构成法律意见；数据仅存本地浏览器、不上传；请基于事实、经教育主管部门官方渠道逐级提交。举报渠道参考 DCR 互助教程整理，以官方最新公布为准。</div>
+
+<main>
+  <div class="panel">
+    <div class="fixed-head">
+      <b>固定内容（自动带上，无需填写）</b>
+      标题：委托求助表<br>
+      声明：以下信息真实、完整，不存在任何虚假信息，本人自主且自愿提供。<br>
+      落款日期：自动填写生成日期
+    </div>
+
+    <div class="panel-tools">
+      <div class="tool-row">
+        <span class="tool-label">场景模板</span>
+        <div class="seg" id="seg-scenario">
+          <button type="button" class="seg-btn" data-sc="buke">补课</button>
+          <button type="button" class="seg-btn" data-sc="kaixue">开学</button>
+          <button type="button" class="seg-btn" data-sc="fee">收费</button>
+          <button type="button" class="seg-btn" data-sc="all">综合</button>
+        </div>
+        <span class="tool-hint">切换套用对应场景默认勾选，已填内容保留</span>
+      </div>
+      <div class="tool-row">
+        <span class="tool-label">案例</span>
+        <select class="case-sel" id="case-sel"></select>
+        <button type="button" class="tool-btn" id="btn-case-new">新建</button>
+        <button type="button" class="tool-btn" id="btn-case-save">保存</button>
+        <button type="button" class="tool-btn danger" id="btn-case-del">删除</button>
+        <span class="tool-hint">草稿仅存本地、不上传 · 删除：清除浏览器站点数据</span>
+      </div>
+    </div>
+
+    <div class="validate-bar" id="validate-bar">
+      <b>还有必填项未完成：</b>
+      <ul id="validate-list"></ul>
+    </div>
+
+    <div class="group-title">学校基本信息</div>
+    <div style="font-size:12px;color:var(--text-3);line-height:1.6;margin:-2px 0 16px;">🔒 为保护未成年人隐私，请勿填写学生姓名、身份证号、家庭住址等完整个人信息；证据材料请自行评估后再提供。</div>
+    <div class="field" data-req>
+      <label for="f-school">学校<span class="req">*</span></label>
+      <input id="f-school" type="text" placeholder="如：XX市第一中学" autocomplete="off">
+    </div>
+    <div class="field" data-req>
+      <label for="f-address">地址<span class="req">*</span></label>
+      <input id="f-address" type="text" placeholder="如：X省X市X县XX镇XX路X号" autocomplete="off">
+    </div>
+    <div class="field" data-req>
+      <label>类型<span class="req">*</span></label>
+      <div class="checks">
+        <label class="check" data-check><input type="checkbox" id="cb-buke"><span class="box"></span>违规补课</label>
+        <label class="check" data-check><input type="checkbox" id="cb-kaixue"><span class="box"></span>提前开学</label>
+      </div>
+      <input id="f-type-other" type="text" placeholder="其他（选填）：如食堂问题，填写后可补充描述">
+    </div>
+
+    <hr class="sep">
+    <div class="group-title">行为</div>
+
+    <div class="collapse" id="col-buke"><div class="cwrap">
+      <div class="subblk" id="blk-buke">
+        <div class="inner">
+          <div class="group-title">违规补课</div>
+          <div class="field" data-req-when="buke">
+            <label for="bk-time">时间<span class="req">*</span></label>
+            <input id="bk-time" type="text" placeholder="如：2026年8月16日至8月28日">
+          </div>
+          <div class="field" data-req-when="buke">
+            <label for="bk-grade">年级<span class="req">*</span></label>
+            <input id="bk-grade" type="text" placeholder="如：高一年级">
+          </div>
+          <div class="field">
+            <label for="bk-notify">通知补课方式<span class="opt">选填</span></label>
+            <input id="bk-notify" type="text" placeholder="如：班级群通知 / 口头通知">
+          </div>
+          <div class="field">
+            <label for="bk-name">名义<span class="opt">选填</span></label>
+            <input id="bk-name" type="text" placeholder="如：自愿自习 / 假期托管">
+          </div>
+          <div class="field" data-req-when="buke">
+            <label for="bk-real">实质<span class="req">*</span></label>
+            <input id="bk-real" type="text" placeholder="如：整班上课、讲新课、收作业">
+          </div>
+        </div>
+      </div>
+    </div></div>
+
+    <div class="collapse" id="col-kaixue"><div class="cwrap">
+      <div class="subblk" id="blk-kaixue">
+        <div class="inner">
+          <div class="group-title">提前开学</div>
+          <div class="field" data-req-when="kaixue">
+            <label for="kx-rule">规定开学时间<span class="req">*</span></label>
+            <input id="kx-rule" type="text" placeholder="如：9月1日（教育局规定）">
+          </div>
+          <div class="field" data-req-when="kaixue">
+            <label for="kx-actual">实际开学时间<span class="req">*</span></label>
+            <input id="kx-actual" type="text" placeholder="如：8月16日">
+          </div>
+          <div class="field" data-req-when="kaixue">
+            <label for="kx-grade">年级<span class="req">*</span></label>
+            <input id="kx-grade" type="text" placeholder="如：高一年级">
+          </div>
+          <div class="field">
+            <label for="kx-notify">通知方式<span class="opt">选填</span></label>
+            <input id="kx-notify" type="text" placeholder="如：班级群通知 / 口头通知">
+          </div>
+          <div class="field">
+            <label for="kx-name">名义<span class="opt">选填</span></label>
+            <input id="kx-name" type="text" placeholder="如：返校报到 / 军训">
+          </div>
+          <div class="field" data-req-when="kaixue">
+            <label for="kx-real">实质<span class="req">*</span></label>
+            <input id="kx-real" type="text" placeholder="如：到校即上课">
+          </div>
+        </div>
+      </div>
+    </div></div>
+
+    <div class="collapse" id="col-other"><div class="cwrap">
+      <div class="subblk" id="blk-other">
+        <div class="inner">
+          <div class="group-title">其他行为</div>
+          <div class="field" data-req-when="other">
+            <label for="f-other-desc">描述<span class="req">*</span></label>
+            <textarea id="f-other-desc" rows="3" placeholder="描述其他违规行为，每行一个自然段"></textarea>
+          </div>
+        </div>
+      </div>
+    </div></div>
+
+    <div class="hint" style="margin:2px 0 6px; font-size:12px; color:var(--text-3);">勾选上方「类型」后填写对应内容</div>
+
+    <hr class="sep">
+    <div class="group-title">收费</div>
+    <div class="field">
+      <div class="checks" data-radiogroup>
+        <label class="check" data-check="radio"><input type="radio" name="fee" id="fee-none"><span class="dot"></span>不收费</label>
+        <label class="check" data-check="radio"><input type="radio" name="fee" id="fee-unknown"><span class="dot"></span>不清楚</label>
+        <label class="check" data-check="radio"><input type="radio" name="fee" id="fee-yes"><span class="dot"></span>收费</label>
+      </div>
+      <input id="f-fee-text" type="text" placeholder="收费金额 / 说明，如：一节课4元，一天十节课，共12天总计480元" style="display:none">
+    </div>
+
+    <hr class="sep">
+    <div class="group-title">诉求</div>
+    <div class="field" data-req>
+      <label>诉求<span class="req">*</span></label>
+      <div class="demand-opts" id="demand-opts">
+        <label class="check" data-dm-opt><input type="checkbox" class="dm-opt" data-label="停止补课行为"><span class="box"></span>停止补课行为</label>
+        <label class="check" data-dm-opt><input type="checkbox" class="dm-opt" data-label="按照教育局规定的时间开学"><span class="box"></span>按照教育局规定的时间开学</label>
+        <label class="check" data-dm-opt><input type="checkbox" class="dm-opt" data-label="恳请教育主管部门实地核查"><span class="box"></span>恳请教育主管部门实地核查</label>
+        <label class="check" data-dm-opt><input type="checkbox" class="dm-opt" data-label="对违规问题依法依规处理"><span class="box"></span>对违规问题依法依规处理</label>
+      </div>
+      <textarea id="f-demands" rows="2" style="display:none"></textarea>
+      <textarea id="f-laws" rows="2" style="display:none"></textarea>
+      <textarea id="f-evidence" rows="2" style="display:none"></textarea>
+      <textarea id="f-demands-custom" rows="2" placeholder="其他诉求（选填，每行一条）"></textarea>
+      <div class="hint">勾选常用诉求，或补充自定义内容；至少选择 / 填写一项</div>
+    </div>
+
+    <hr class="sep">
+    <div class="group-title">举报途径</div>
+    <div class="field" data-req-any="f-tel,f-net">
+      <label for="f-tel">电话<span class="req">*</span></label>
+      <input id="f-tel" type="text" placeholder="如：0743-8222234">
+    </div>
+    <div class="field" data-req-any="f-tel,f-net">
+      <label for="f-net">网络<span class="req">*</span></label>
+      <input id="f-net" type="text" placeholder="如：XX省教育厅举报平台网址（选下方省份后显示具体入口）">
+    </div>
+    <div class="hint" style="font-size:12px; color:var(--text-3);">电话 / 网络至少填一项</div>
+
+    <div class="field-row">
+      <div class="field">
+        <label for="f-province">所在省份</label>
+        <select id="f-province"><option value="">请选择省份</option></select>
+      </div>
+      <div class="field">
+        <label for="f-city">所在城市<span class="opt">选填</span></label>
+        <input id="f-city" type="text" placeholder="如：XX 市">
+      </div>
+    </div>
+    <div class="channel-hint" id="channel-hint"></div>
+
+    <details class="online-help">
+      <summary>常用网络 / 电话举报入口（点击展开，含链接与具体操作）</summary>
+      <ul>
+        <li><b>12345 政务服务热线</b>：拨打「区号+12345」（如 0591-12345）。建议全程录音、先问工号、明确要求保密、拒答个人信息；可匿名，一般 15 个工作日内答复。</li>
+        <li><b>国务院客户端小程序</b>：微信搜索「国务院」小程序 →「我要留言 / 互联网+督查」→ 按提示填写提交（需实名，可选择保密）。</li>
+        <li><b>领导留言板</b>：<a href="https://liuyan.people.com.cn" target="_blank" rel="noopener">liuyan.people.com.cn</a>（人民网），选择对应省 / 市领导留言。</li>
+        <li><b>中国教育督导</b>：微信搜索并关注公众号「中国教育督导」→ 菜单「举报平台」（仅限中小学，需实名）。</li>
+        <li><b>各省规范办学行为举报平台</b>：选择下方「所在省份」后，自动显示该省举报电话 / 网址 / 邮箱。</li>
+      </ul>
+      <div class="oh-note">渠道整理自 DCR 互助教程，仅供参考，以各地教育部门官网最新公布为准；请逐级递交、保护隐私，避免用实名手机号举报与自身相关事项。</div>
+    </details>
+
+    <hr class="sep">
+    <div class="group-title">附录信息（选填）</div>
+    <div class="field">
+      <label>附：相关法律依据</label>
+      <div class="demand-opts" id="law-opts"></div>
+      <div class="hint">勾选要附在文档末尾的法规依据（默认不勾选，按需选择）；具体条款以教育部及各地教育部门官网最新公布为准。</div>
+    </div>
+    <div class="field">
+      <label>建议附带材料</label>
+      <div class="demand-opts" id="ev-opts"></div>
+      <textarea id="f-evidence-custom" rows="2" placeholder="其他材料（选填，每行一条）"></textarea>
+      <div class="hint">为提升举报有效性，建议随表附上上述材料（如有）；请勿伪造证据，虚假证据将承担法律责任。</div>
+    </div>
+
+    <hr class="sep">
+    <div class="group-title">落款</div>
+    <div class="field">
+      <label for="f-signer">署名<span class="opt">选填</span></label>
+      <input id="f-signer" type="text" placeholder="如：学生家长；留空即保持匿名">
+      <div class="hint">日期自动填写生成日期，无需填写</div>
+    </div>
+
+    <div class="action-row">
+      <button type="button" class="clear-btn" id="btn-clear">清空重填</button>
+    </div>
+  </div>
+
+  <section class="preview">
+    <div class="pv-head"><b>网页预览</b><span>随填写自动更新 · 导出的正式排版</span></div>
+    <div class="pv-body"><iframe id="pv" title="生成页面预览"></iframe>
+      <div class="pv-empty" id="pv-empty" style="display:none">
+        <svg class="pv-e-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5"/><path d="M9 13h6M9 17h4"/></svg>
+        <div class="pv-e-title">开始填写左侧表单</div>
+        <div class="pv-e-sub">右侧将实时生成正式排版 · 复制 / 导出 Word / 下载图片 / 打印 PDF</div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<div class="ui-modal" id="ui-modal" hidden>
+  <div class="ui-modal-box" role="dialog" aria-modal="true">
+    <div class="ui-modal-msg" id="ui-modal-msg"></div>
+    <div class="ui-modal-actions">
+      <button type="button" class="btn" id="ui-cancel">取消</button>
+      <button type="button" class="btn primary" id="ui-ok">确定</button>
+    </div>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<script>
+  /* 可选自定义水印图：把 base64 图片放到 wm-data.js 的 WM_SRC_DATA，
+     例如  var WM_SRC_DATA = "data:image/png;base64,iVBOR...";
+     不定义则使用内置文字水印。开源默认留空。 */
+  var WM_SRC_DATA = "";
+</script>
+<script>
+(function () {
+  var $ = function (id) { return document.getElementById(id); };
+  var pv = $('pv');
+  var KEY = 'jubao-page-generator-draft-v5';
+  var FIELDS = ['f-school', 'f-address', 'f-type-other', 'bk-time', 'bk-grade', 'bk-notify', 'bk-name', 'bk-real', 'kx-rule', 'kx-actual', 'kx-grade', 'kx-notify', 'kx-name', 'kx-real', 'f-other-desc', 'f-fee-text', 'f-demands', 'f-tel', 'f-net', 'f-signer', 'f-province', 'f-city', 'f-laws', 'f-evidence'];
+  var FIXED_TITLE = '委托求助表';
+  var FIXED_DECL = '以下信息真实、完整，不存在任何虚假信息，本人自主且自愿提供；如实反映情况，对所反映内容真实性负责，不得捏造事实诬告陷害他人。';
+
+  /* 法律依据库（真实权威法规名称 + 公开表述；不杜撰法条编号，具体条款以官方最新公布为准） */
+  var LAW_LIB = [
+    { k: 'sj', t: '中共中央办公厅、国务院办公厅《关于进一步减轻义务教育阶段学生作业负担和校外培训负担的意见》（2021年，“双减”）', d: '严禁违规组织学生集体补课或变相补课，严禁利用寒暑假、法定节假日组织学生集体补课；切实减轻学生过重作业负担与校外培训负担。' },
+    { k: 'tsn', t: '教育部办公厅《关于开展基础教育规范管理提升年行动的通知》（2025年）', d: '持续规范中小学办学行为、畅通问题反映渠道；已建设全国统一的基础教育规范管理问题反映平台，举报线索自动分派、办理结果全程可溯。' },
+    { k: 'yj1', t: '教育部《严禁中小学校和在职中小学教师有偿补课的规定》（教师〔2015〕5号）', d: '严禁中小学校组织、要求学生参加校内外有偿补课；严禁在职中小学教师组织、推荐或诱导学生参加校内外有偿补课。' },
+    { k: 'ywjy', t: '《中华人民共和国义务教育法》', d: '学校不得违反国家规定收取费用，不得以向学生推销或者变相推销商品、服务等方式谋取利益；依法保障适龄儿童、少年接受义务教育。' },
+    { k: 'jyf', t: '《中华人民共和国教育法》', d: '受教育者对学校教育教学、管理工作享有提出意见和建议的权利，可依法对学校办学行为进行监督与申诉。' }
+  ];
+  /* 建议附带材料库 */
+  var EVID_LIB = [
+    '收费凭证（收据、转账记录、缴费通知）',
+    '课程表 / 作息时间表截图',
+    '补课或提前开学通知（群消息、纸质通知）',
+    '现场照片或视频',
+    '与学校 / 老师的沟通记录（微信、短信）',
+    '学生证 / 在校证明等其他材料'
+  ];
+  /* 省级行政区（用于举报渠道智能提示，不硬编码具体电话） */
+  var PROVINCES = ['北京市','天津市','河北省','山西省','内蒙古自治区','辽宁省','吉林省','黑龙江省','上海市','江苏省','浙江省','安徽省','福建省','江西省','山东省','河南省','湖北省','湖南省','广东省','广西壮族自治区','海南省','重庆市','四川省','贵州省','云南省','西藏自治区','陕西省','甘肃省','青海省','宁夏回族自治区','新疆维吾尔自治区','台湾省','香港特别行政区','澳门特别行政区'];
+  /* 各省（区、市）中小学规范办学行为举报平台（整理自 DCR 互助教程，仅供参考，以官方最新为准） */
+  var CHANNEL_LIB = {
+    '北京': { tel: '010-12345' },
+    '天津': { tel: '022-83215060', mail: 'sjwjyzh@tj.gov.cn' },
+    '河北': { mail: 'wgbkjbyx@163.com' },
+    '山西': { tel: '0351-3046300', site: 'http://jyt.shanxi.gov.cn/' },
+    '内蒙古': { site: 'https://xmtb.nmgov.edu.cn/dzzjz/enrollment/info/add', mail: 'jytjjcyq@126.com' },
+    '辽宁': { tel: '024-86891848', mail: 'lnsjygfb@163.com' },
+    '吉林': { tel: '0431-89968321', mail: 'jlsjcjy@163.com' },
+    '黑龙江': { tel: '0451-53621738', mail: 'jytjjc1@163.com' },
+    '上海': { tel: '021-962066-9', site: 'https://basic.sh.smartedu.cn/tsjb' },
+    '江苏': { tel: '025-83335604', mail: 'jsgfbx@163.com' },
+    '浙江': { tel: '0571-88008848', site: 'https://jyt.zj.gov.cn/', mail: 'jjc@zjedu.gov.cn' },
+    '安徽': { tel: '0551-62829059', mail: 'jjc@ahedu.gov.cn' },
+    '福建': { tel: '0591-87091371', site: 'http://jyt.fujian.gov.cn/ztzl/gfzxxbxxw', mail: 'fjsgfbx@fjsjyt.cn' },
+    '江西': { tel: '0791-86765130、96365', mail: 'wgbk@jxedu.gov.cn' },
+    '山东': { tel: '0531-82924403', mail: 'zxgl@shandong.cn' },
+    '河南': { tel: '0371-69691083、13069389321', mail: 'wgbk@jyt.henan.gov.cn' },
+    '湖北': { tel: '027-87328126、027-87328063', mail: 'hbgfbx@163.com' },
+    '湖南': { tel: '0731-82204148', site: 'https://fuwu.jyt.hunan.gov.cn', mail: 'a5174148@163.com' },
+    '广东': { tel: '020-37628803', site: 'https://edu.gd.gov.cn/ztzlnew/gfbx' },
+    '广西': { tel: '0771-5815802、5815000', site: 'http://jyt.gxzf.gov.cn/zfxxgk/fdzdgknr/tzgg_58179/t19715383.shtml', mail: 'gfgl@jyt.gxzf.gov.cn' },
+    '海南': { tel: '0898-65230370', mail: '65230825@163.com' },
+    '重庆': { tel: '023-67656197、023-67780729', site: 'https://jcjy.cqedu.cn/app/cqsrxyjs/index.html#/complain/complain_index' },
+    '四川': { tel: '028-86113375', mail: 'scgfbx@163.com' },
+    '贵州': { tel: '0851-85284911', site: 'https://jyt.guizhou.gov.cn/', mail: 'gzsjytjjc@126.com' },
+    '云南': { site: 'https://jyt.yn.gov.cn/article/2147451527' },
+    '西藏': { tel: '0891-6599518', mail: 'edts8500@163.com' },
+    '陕西': { tel: '029-88668852、88668870', mail: 'sxgzgfbx@126.com、sxjcjygfn_2024@163.com' },
+    '甘肃': { tel: '0931-8283115', mail: 'jjiao@gsedu.cn' },
+    '青海': { tel: '0971-6310023', site: 'https://jyt.qinghai.gov.cn/gk/tzgg/idoc.html?namepid=2093', mail: 'qhjyzxz@163.com' }
+  };
+  var DEFAULT_DEMANDS = '停止补课行为\n按照教育局规定的时间开学\n恳请教育主管部门实地核查\n对违规问题依法依规处理';
+  var IMG_W = 900;
+  var WM_SRC = (typeof WM_SRC_DATA !== 'undefined' && WM_SRC_DATA) ? WM_SRC_DATA : '';
+
+  /* ---------- 工具 ---------- */
+  var esc = function (s) {
+    return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) {
+      return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
+    });
+  };
+  var getLines = function (v) {
+    return String(v || '').split(/\r?\n/).map(function (t) { return t.trim(); }).filter(Boolean);
+  };
+  var today = function () {
+    var n = new Date(), p = function (x) { return String(x).padStart(2, '0'); };
+    return n.getFullYear() + '-' + p(n.getMonth() + 1) + '-' + p(n.getDate());
+  };
+  var nowStamp = function () {
+    var n = new Date(), p = function (x) { return String(x).padStart(2, '0'); };
+    return n.getFullYear() + p(n.getMonth() + 1) + p(n.getDate()) + '-' + p(n.getHours()) + p(n.getMinutes()) + p(n.getSeconds());
+  };
+  /* 防篡改编号：基于内容 hash 生成 8 位短编号 + 时间戳 */
+  function contentHash(str) {
+    var h = 0x811c9dc5;
+    for (var i = 0; i < str.length; i++) {
+      h ^= str.charCodeAt(i);
+      h = Math.imul(h, 0x01000193);
+    }
+    return (h >>> 0).toString(16).toUpperCase().padStart(8, '0').slice(0, 8);
+  }
+
+  var toastTimer = null;
+  function toast(msg, kind) {
+    var t = $('toast');
+    /* 克制反馈：成功类带一个简洁对勾，2.5s 后自熄淡出（铁律⑩） */
+    var tick = '<svg class="tick" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>';
+    t.innerHTML = (kind === 'ok' ? tick : '') + '<span>' + esc(msg) + '</span>';
+    t.className = 'show' + (kind ? ' ' + kind : '');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(function () { t.className = ''; }, 2500);
+  }
+
+  /* ---------- 数据 ---------- */
+  function collect() {
+    var d = {};
+    FIELDS.forEach(function (id) { d[id] = $(id).value; });
+    d.buke = $('cb-buke').checked;
+    d.kaixue = $('cb-kaixue').checked;
+    d.feeChoice = '';
+    if ($('fee-none').checked) d.feeChoice = 'none';
+    else if ($('fee-unknown').checked) d.feeChoice = 'unknown';
+    else if ($('fee-yes').checked) d.feeChoice = 'yes';
+    return d;
+  }
+
+  /* 诉求：4 个可选项 + 可选自定义输入，实时组合进隐藏规范字段 f-demands */
+  function composeDemands() {
+    var sel = [];
+    document.querySelectorAll('.dm-opt').forEach(function (c) {
+      if (c.checked) sel.push(c.getAttribute('data-label'));
+    });
+    var custom = getLines($('f-demands-custom').value);
+    $('f-demands').value = sel.concat(custom).join('\n');
+  }
+  function restoreDemandUI() {
+    var lines = getLines($('f-demands').value);
+    var set = {}; lines.forEach(function (x) { set[x] = true; });
+    var defaults = {};
+    document.querySelectorAll('.dm-opt').forEach(function (c) {
+      var lab = c.getAttribute('data-label');
+      defaults[lab] = true;
+      c.checked = !!set[lab];
+    });
+    var custom = lines.filter(function (x) { return !defaults[x]; });
+    $('f-demands-custom').value = custom.join('\n');
+  }
+
+  /* 附录：法律依据 / 建议材料 —— 勾选实时组合进隐藏规范字段，导出/草稿零改动 */
+  function buildLawOpts() {
+    $('law-opts').innerHTML = LAW_LIB.map(function (x) {
+      return '<label class="check" data-law-opt><input type="checkbox" class="law-opt" data-key="' + x.k + '"><span class="box"></span>' + esc(x.t) + '</label>';
+    }).join('');
+  }
+  function buildEvOpts() {
+    $('ev-opts').innerHTML = EVID_LIB.map(function (x) {
+      return '<label class="check" data-ev-opt><input type="checkbox" class="ev-opt" data-label="' + esc(x) + '"><span class="box"></span>' + esc(x) + '</label>';
+    }).join('');
+  }
+  function composeLaws() {
+    var keys = [];
+    document.querySelectorAll('.law-opt').forEach(function (c) { if (c.checked) keys.push(c.getAttribute('data-key')); });
+    $('f-laws').value = keys.join(',');
+  }
+  function restoreLawUI() {
+    var keys = ($('f-laws').value || '').split(',').filter(Boolean);
+    var set = {}; keys.forEach(function (k) { set[k] = true; });
+    document.querySelectorAll('.law-opt').forEach(function (c) { c.checked = !!set[c.getAttribute('data-key')]; });
+  }
+  function composeEv() {
+    var sel = [];
+    document.querySelectorAll('.ev-opt').forEach(function (c) { if (c.checked) sel.push(c.getAttribute('data-label')); });
+    var custom = getLines($('f-evidence-custom').value);
+    $('f-evidence').value = sel.concat(custom).join('\n');
+  }
+  function restoreEvUI() {
+    var lines = getLines($('f-evidence').value);
+    var defaults = {};
+    document.querySelectorAll('.ev-opt').forEach(function (c) { defaults[c.getAttribute('data-label')] = true; });
+    var set = {};
+    lines.forEach(function (x) { if (defaults[x]) set[x] = true; });
+    document.querySelectorAll('.ev-opt').forEach(function (c) { c.checked = !!set[c.getAttribute('data-label')]; });
+    var custom = lines.filter(function (x) { return !defaults[x]; });
+    $('f-evidence-custom').value = custom.join('\n');
+  }
+  /* 举报渠道智能提示：指引式，不硬编码具体电话（仅 12345 全国通用） */
+  function updateChannelHint() {
+    var p = $('f-province').value;
+    var el = $('channel-hint');
+    if (!p) { el.style.display = 'none'; el.innerHTML = ''; return; }
+    el.style.display = 'block';
+    var hit = null;
+    Object.keys(CHANNEL_LIB).forEach(function (k) { if (!hit && p.indexOf(k) === 0) hit = CHANNEL_LIB[k]; });
+    var rows = [];
+    if (hit) {
+      var parts = [];
+      if (hit.tel) parts.push('电话 <b>' + esc(hit.tel) + '</b>');
+      if (hit.site) parts.push('网址 <a href="' + esc(hit.site) + '" target="_blank" rel="noopener">' + esc(hit.site) + '</a>');
+      if (hit.mail) parts.push('邮箱 ' + esc(hit.mail));
+      rows.push('📍 <b>' + esc(p) + '</b> 中小学规范办学行为举报平台：' + parts.join('　'));
+    } else {
+      rows.push('📍 <b>' + esc(p) + '</b>：搜索「' + esc(p) + '教育厅（局）官网」→「信访举报 / 违规办学举报」栏目（未收录该省专门平台，以官网为准）。');
+    }
+    rows.push('① 拨打 <b>区号+12345</b> 政务服务热线（可匿名、约 15 个工作日；建议录音、问工号、要求保密）');
+    rows.push('② 微信搜索「国务院」小程序 → 我要留言（实名，可选保密）');
+    rows.push('③ 领导留言板 <a href="https://liuyan.people.com.cn" target="_blank" rel="noopener">liuyan.people.com.cn</a>');
+    el.innerHTML = '建议逐级提交（以官方最新公布为准）：<br>' + rows.join('<br>');
+  }
+  function fillProvinces() {
+    $('f-province').innerHTML = '<option value="">请选择省份</option>' + PROVINCES.map(function (p) {
+      return '<option value="' + p + '">' + p + '</option>';
+    }).join('');
+  }
+
+  function telLink(escapedVal, rawVal) {
+    var pm = rawVal.match(/\d{3,4}-\d{7,8}|\d{11}|\d{7,8}/);
+    if (!pm) return escapedVal;
+    var p = esc(pm[0]);
+    return escapedVal.replace(p, '<a href="tel:' + pm[0].replace(/[^0-9]/g, '') + '">' + p + '</a>');
+  }
+
+  function getTypeText(d) {
+    var parts = [];
+    if (d.buke) parts.push('违规补课');
+    if (d.kaixue) parts.push('提前开学');
+    var other = (d['f-type-other'] || '').trim();
+    if (other) parts.push('其他（' + other + '）');
+    return parts.join('、');
+  }
+
+  function getFeeText(d) {
+    if (d.feeChoice === 'none') return '不收费';
+    if (d.feeChoice === 'unknown') return '不清楚';
+    if (d.feeChoice === 'yes') {
+      var t = (d['f-fee-text'] || '').trim();
+      return t ? '收费（' + t + '）' : '收费';
+    }
+    return '';
+  }
+
+  function getActs(d) {
+    var acts = [];
+    if (d.buke) {
+      acts.push(['违规补课', [
+        ['时间', d['bk-time']], ['年级', d['bk-grade']], ['通知补课方式', d['bk-notify']],
+        ['名义', d['bk-name']], ['实质', d['bk-real']]
+      ].filter(function (r) { return String(r[1] || '').trim(); })]);
+    }
+    if (d.kaixue) {
+      acts.push(['提前开学', [
+        ['规定开学时间', d['kx-rule']], ['实际开学时间', d['kx-actual']], ['年级', d['kx-grade']],
+        ['通知补课方式', d['kx-notify']], ['名义', d['kx-name']], ['实质', d['kx-real']]
+      ].filter(function (r) { return String(r[1] || '').trim(); })]);
+    }
+    return acts;
+  }
+
+  function wmHTML(xhtml) {
+    if (WM_SRC) return '<img src="' + WM_SRC + '" alt=""/>';
+    return '<div class="wm-in">委托求助表</div>';
+  }
+
+  /* 防篡改尾注 */
+  function tamperNote() {
+    return '编号 ' + contentHash(JSON.stringify(collect())) + ' · 生成于 ' + nowStamp();
+  }
+
+  /* ---------- 网页预览 ---------- */
+  var GEN_CSS = [
+    '*{margin:0;padding:0;box-sizing:border-box}',
+    'body{background:#eef1f5;font-family:"Noto Serif SC","Source Han Serif SC","SimSun","STSong",serif;color:#1a1a1a;line-height:1.9}',
+    '.paper{max-width:840px;margin:28px auto;background:#fff;padding:52px 60px 40px;box-shadow:0 6px 24px rgba(15,23,42,.13);border-top:8px solid #1E8A6E;position:relative}',
+    '.wm{position:absolute;top:0;left:0;right:0;bottom:0;display:flex;align-items:center;justify-content:center;opacity:.12;pointer-events:none}',
+    '.wm img{width:72%;height:auto;display:block}',
+    '.wm-in{font-size:44px;font-weight:800;color:#1E8A6E;letter-spacing:8px;white-space:nowrap}',
+    '.content{position:relative;z-index:1}',
+    'header{text-align:center;margin-bottom:22px}',
+    'header h1{font-size:30px;letter-spacing:3px;color:#1E8A6E;margin-bottom:10px;font-weight:900}',
+    'header .meta{font-size:13px;color:#6b7280}',
+    '.notice{background:#f4faf7;border-left:5px solid #2BAE8C;border-radius:8px;padding:14px 18px;font-size:14.5px;color:#14574A;margin-bottom:28px}',
+    '.notice .n-t{font-weight:700}',
+    'section{margin-bottom:26px}',
+    'section h2{font-size:19px;color:#111827;margin-bottom:14px;padding-left:12px;border-left:4px solid #2BAE8C;line-height:1.5}',
+    'table.info{width:100%;border-collapse:collapse;font-size:15px}',
+    'table.info th{width:132px;background:#f4faf7;font-weight:700;color:#374151;text-align:left;white-space:nowrap}',
+    'table.info th,table.info td{border:1px solid #d6dbe2;padding:11px 16px}',
+    'section p{font-size:15.5px;margin-bottom:8px;text-align:justify}',
+    '.acts .act{background:#f6faf8;border:1px solid #e5e9f0;border-radius:8px;padding:12px 16px;margin-bottom:10px}',
+    '.acts .act-t{font-weight:700;font-size:15.5px;margin-bottom:4px}',
+    '.acts .kv{font-size:15px;line-height:1.9}',
+    '.acts .k{font-weight:700;color:#374151}',
+    '.channels .channel{font-size:15.5px;padding:10px 16px;background:#f6faf8;border:1px solid #e5e9f0;border-radius:8px;margin-bottom:8px}',
+    '.channels .c-label{font-weight:700}',
+    'a{color:#1E8A6E;text-decoration:none;border-bottom:1px dashed #2BAE8C}',
+    'ul.demands{list-style:none;padding-left:1.5em}',
+    'ul.demands li{font-size:15.5px;margin-bottom:8px;text-indent:-1.5em}',
+    '.signature{text-align:right;margin-top:36px;font-size:15px;line-height:2.1;color:#111827}',
+    '.tamper{margin-top:24px;padding-top:12px;border-top:1px dashed #cbd5e1;font-size:11.5px;color:#9ca3af;font-family:monospace;letter-spacing:.5px}',
+    'footer{margin-top:20px;padding-top:14px;border-top:1px solid #e5e7eb;text-align:center;font-size:12px;color:#9ca3af;line-height:1.8}',
+    '@media print{body{background:#fff}.paper{box-shadow:none;margin:0;max-width:100%;padding:10mm 0}a{color:inherit;border-bottom:none}}',
+    '.law-i{background:#f6faf8;border:1px solid #e5e9f0;border-radius:8px;padding:10px 14px;margin-bottom:8px}',
+    '.law-t{font-weight:700;font-size:15px;color:#111827;margin-bottom:3px}',
+    '.law-d{font-size:13.5px;color:#374151;line-height:1.8;text-align:justify}',
+    '.law-foot{font-size:11.5px;color:#9ca3af;margin-top:6px}',
+    '.ev-note{font-size:14px;color:#374151;margin-bottom:8px}',
+    '.ev-list{list-style:disc;padding-left:1.6em}',
+    '.ev-list li{font-size:15px;margin-bottom:6px}',
+    '@page{margin:14mm}'
+  ].join('\n');
+
+  var IMG_CSS = [
+    '*{margin:0;padding:0;box-sizing:border-box}',
+    '.paper{width:900px;background:#fff;padding:52px 60px 40px;border-top:8px solid #1E8A6E;position:relative}',
+    '.wm{position:absolute;top:0;left:0;right:0;bottom:0;display:flex;align-items:center;justify-content:center;opacity:.12;pointer-events:none}',
+    '.wm img{width:72%;height:auto;display:block}',
+    '.wm-in{font-size:44px;font-weight:800;color:#1E8A6E;letter-spacing:8px;white-space:nowrap}',
+    '.content{position:relative;z-index:1}',
+    'header{text-align:center;margin-bottom:22px}',
+    'header h1{font-size:30px;letter-spacing:3px;color:#1E8A6E;margin-bottom:10px;font-weight:900}',
+    'header .meta{font-size:13px;color:#6b7280}',
+    '.notice{background:#f4faf7;border-left:5px solid #2BAE8C;border-radius:8px;padding:14px 18px;font-size:14.5px;color:#14574A;margin-bottom:28px}',
+    '.notice .n-t{font-weight:700}',
+    'section{margin-bottom:26px}',
+    'section h2{font-size:19px;color:#111827;margin-bottom:14px;padding-left:12px;border-left:4px solid #2BAE8C;line-height:1.5}',
+    'table.info{width:100%;border-collapse:collapse;font-size:15px}',
+    'table.info th{width:132px;background:#f4faf7;font-weight:700;color:#374151;text-align:left;white-space:nowrap}',
+    'table.info th,table.info td{border:1px solid #d6dbe2;padding:11px 16px}',
+    'section p{font-size:15.5px;margin-bottom:8px;text-align:justify}',
+    '.acts .act{background:#f6faf8;border:1px solid #e5e9f0;border-radius:8px;padding:12px 16px;margin-bottom:10px}',
+    '.acts .act-t{font-weight:700;font-size:15.5px;margin-bottom:4px}',
+    '.acts .kv{font-size:15px;line-height:1.9}',
+    '.acts .k{font-weight:700;color:#374151}',
+    '.channels .channel{font-size:15.5px;padding:10px 16px;background:#f6faf8;border:1px solid #e5e9f0;border-radius:8px;margin-bottom:8px}',
+    '.channels .c-label{font-weight:700}',
+    '.demands .d-i{font-size:15.5px;margin-bottom:8px;padding-left:1.5em;text-indent:-1.5em}',
+    '.signature{text-align:right;margin-top:36px;font-size:15px;line-height:2.1;color:#111827}',
+    '.tamper{margin-top:24px;padding-top:12px;border-top:1px dashed #cbd5e1;font-size:11.5px;color:#9ca3af;font-family:monospace;letter-spacing:.5px}',
+    '.law-i{background:#f6faf8;border:1px solid #e5e9f0;border-radius:8px;padding:10px 14px;margin-bottom:8px}',
+    '.law-t{font-weight:700;font-size:15px;color:#111827;margin-bottom:3px}',
+    '.law-d{font-size:13.5px;color:#374151;line-height:1.8;text-align:justify}',
+    '.law-foot{font-size:11.5px;color:#9ca3af;margin-top:6px}',
+    '.ev-note{font-size:14px;color:#374151;margin-bottom:8px}',
+    '.ev-list{list-style:disc;padding-left:1.6em}',
+    '.ev-list li{font-size:15px;margin-bottom:6px}',
+    'footer{margin-top:20px;padding-top:14px;border-top:1px solid #e5e7eb;text-align:center;font-size:12px;color:#9ca3af;line-height:1.8}'
+  ].join('\n');
+
+  /* 段落构造（网页版 / 图片版共用逻辑） */
+  function buildSections(d, xhtml) {
+    var secs = [];
+    var infoRows = [];
+    if ((d['f-school'] || '').trim()) infoRows.push(['学校', d['f-school'].trim()]);
+    if ((d['f-address'] || '').trim()) infoRows.push(['地址', d['f-address'].trim()]);
+    var typeText = getTypeText(d);
+    if (typeText) infoRows.push(['类型', typeText]);
+    if (infoRows.length) {
+      secs.push(['基本信息', '<table class="info">' + infoRows.map(function (r) {
+        return '<tr><th>' + esc(r[0]) + '</th><td>' + esc(r[1]) + '</td></tr>';
+      }).join('') + '</table>']);
+    }
+
+    var acts = getActs(d);
+    var otherDesc = (d['f-other-desc'] || '').trim();
+    if (acts.length || otherDesc) {
+      var actHTML = acts.map(function (a) {
+        return '<div class="act"><div class="act-t">' + esc(a[0]) + '</div>'
+          + a[1].map(function (r) {
+            return '<div class="kv"><span class="k">' + esc(r[0]) + '：</span>' + esc(r[1].trim()) + '</div>';
+          }).join('')
+          + '</div>';
+      }).join('');
+      if (otherDesc) actHTML += getLines(otherDesc).map(function (p) { return '<p>' + esc(p) + '</p>'; }).join('');
+      secs.push(['行为', '<div class="acts">' + actHTML + '</div>']);
+    }
+
+    var feeText = getFeeText(d);
+    if (feeText) secs.push(['收费', '<p>' + esc(feeText) + '</p>']);
+
+    var dem = getLines(d['f-demands']);
+    if (dem.length) {
+      if (xhtml) secs.push(['诉求', '<div class="demands">' + dem.map(function (x) { return '<p class="d-i">- ' + esc(x) + '</p>'; }).join('') + '</div>']);
+      else secs.push(['诉求', '<ul class="demands">' + dem.map(function (x) { return '<li>' + esc(x) + '</li>'; }).join('') + '</ul>']);
+    }
+
+    var tel = (d['f-tel'] || '').trim(), net = (d['f-net'] || '').trim();
+    if (tel || net) {
+      var ch = '';
+      if (tel) ch += '<div class="channel"><span class="c-label">电话</span>：' + (xhtml ? esc(tel) : telLink(esc(tel), tel)) + '</div>';
+      if (net) ch += '<div class="channel"><span class="c-label">网络</span>：' + esc(net) + '</div>';
+      secs.push(['举报途径', '<div class="channels">' + ch + '</div>']);
+    }
+
+    var lawKeys = (d['f-laws'] || '').split(',').filter(Boolean);
+    var lawItems = LAW_LIB.filter(function (x) { return lawKeys.indexOf(x.k) !== -1; });
+    if (lawItems.length) {
+      var lawHTML = lawItems.map(function (x) {
+        return '<div class="law-i"><div class="law-t">' + esc(x.t) + '</div><div class="law-d">' + esc(x.d) + '</div></div>';
+      }).join('') + '<div class="law-foot">所列依据为常见相关规定，请以官方最新文本为准。</div>';
+      secs.push(['附：相关法律依据', lawHTML]);
+    }
+
+    var evLines = getLines(d['f-evidence']);
+    if (evLines.length) {
+      var evHTML = '<div class="ev-note">为提升举报有效性，建议随表附上以下材料（如有）：</div>'
+        + '<ul class="ev-list">' + evLines.map(function (x) { return '<li>' + esc(x) + '</li>'; }).join('') + '</ul>';
+      secs.push(['建议附带材料', evHTML]);
+    }
+
+    var body = secs.map(function (s, i) {
+      return '<section><h2>' + (i + 1) + '. ' + esc(s[0]) + '</h2>' + s[1] + '</section>';
+    }).join('\n');
+    return { secs: secs, body: body, otherDesc: otherDesc };
+  }
+
+  function buildHTML(d) {
+    var b = buildSections(d, false);
+    var signer = (d['f-signer'] || '').trim();
+    var sig = '<div class="signature">' + (signer ? '举报人：' + esc(signer) + '<br>' : '') + today() + '</div>';
+    var tamper = '<div class="tamper">本文件含内容校验编号 · ' + tamperNote() + '</div>';
+
+    return '<!DOCTYPE html>\n<html lang="zh-CN">\n<head>\n<meta charset="UTF-8">\n'
+      + '<meta name="viewport" content="width=device-width,initial-scale=1">\n'
+      + '<title>' + esc(FIXED_TITLE) + '</title>\n<style>\n' + GEN_CSS + '\n</style>\n</head>\n<body>\n'
+      + '<div class="paper">\n<div class="wm">' + wmHTML() + '</div>\n<div class="content">\n'
+      + '<header><h1>' + esc(FIXED_TITLE) + '</h1><div class="meta">生成时间：' + today() + '</div></header>\n'
+      + '<div class="notice"><span class="n-t">【声明】</span>' + esc(FIXED_DECL) + '</div>\n'
+      + b.body + '\n' + sig + '\n' + tamper + '\n'
+      + '<footer>本内容由填写人自愿提供并对真实性负责 · 本工具仅在本地浏览器处理、数据不上传 · 自助模板非官方文书、不构成法律意见，请经教育主管部门官方渠道提交 · 由 TutoringAppeal 排版生成</footer>\n'
+      + '</div>\n</div>\n</body>\n</html>';
+  }
+
+  /* ---------- 纯文本（严格按模板格式 + 防篡改编号） ---------- */
+  function buildPlainText(d) {
+    var blocks = [];
+    if ((d['f-school'] || '').trim()) blocks.push('学校：' + d['f-school'].trim());
+    if ((d['f-address'] || '').trim()) blocks.push('地址：' + d['f-address'].trim());
+    var typeText = getTypeText(d);
+    if (typeText) blocks.push('类型：' + typeText);
+
+    var acts = getActs(d);
+    var otherDesc = (d['f-other-desc'] || '').trim();
+    if (acts.length || otherDesc) {
+      var lines = ['行为：'];
+      acts.forEach(function (a) {
+        lines.push(a[0]);
+        a[1].forEach(function (r) { lines.push(' - ' + r[0] + '：' + r[1].trim()); });
+      });
+      getLines(otherDesc).forEach(function (p) { lines.push(' - ' + p); });
+      blocks.push(lines.join('\n'));
+    }
+
+    var feeText = getFeeText(d);
+    if (feeText) blocks.push('收费：' + feeText);
+
+    var dem = getLines(d['f-demands']);
+    if (dem.length) blocks.push('诉求：\n' + dem.map(function (x) { return ' - ' + x; }).join('\n'));
+
+    var tel = (d['f-tel'] || '').trim(), net = (d['f-net'] || '').trim();
+    if (tel || net) {
+      var l2 = ['举报途径：'];
+      if (tel) l2.push(' - 电话：' + tel);
+      if (net) l2.push(' - 网络：' + net);
+      blocks.push(l2.join('\n'));
+    }
+
+    var lawKeys = (d['f-laws'] || '').split(',').filter(Boolean);
+    var lawItems = LAW_LIB.filter(function (x) { return lawKeys.indexOf(x.k) !== -1; });
+    if (lawItems.length) {
+      blocks.push('附：相关法律依据：\n' + lawItems.map(function (x) { return ' - ' + x.t + '：' + x.d; }).join('\n') + '\n（所列依据为常见相关规定，请以官方最新文本为准）');
+    }
+    var evLines = getLines(d['f-evidence']);
+    if (evLines.length) {
+      blocks.push('建议附带材料（如有）：\n' + evLines.map(function (x) { return ' - ' + x; }).join('\n') + '\n（请勿伪造证据，虚假证据将承担法律责任）');
+    }
+
+    var signer = (d['f-signer'] || '').trim();
+    var out = [FIXED_TITLE, '', '【声明】' + FIXED_DECL];
+    if (blocks.length) out.push('', blocks.join('\n\n'));
+    out.push('', (signer ? '举报人：' + signer + '　' : '') + today());
+    out.push('', '—— 内容校验编号 ' + contentHash(JSON.stringify(d)) + ' · 生成于 ' + nowStamp() + ' ——');
+    return out.join('\n') + '\n';
+  }
+
+  /* ---------- Word (.docx) 导出 ----------
+   * 纯前端方案：构造 MHT/HTML 复合文档（.doc），Office/WPS 可直接打开。
+   * 相比 zip 式 .docx 更稳（免依赖库、跨浏览器一致），且排版还原度高。 */
+  function buildDoc(d) {
+    var b = buildSections(d, true);
+    var signer = (d['f-signer'] || '').trim();
+    var sig = '<p align="right" style="margin-top:30px;line-height:2;">'
+      + (signer ? '举报人：' + esc(signer) + '<br>' : '') + today() + '</p>';
+    var tamper = '<p style="margin-top:20px;border-top:1px dashed #ccc;padding-top:8px;font-size:10pt;color:#999;">'
+      + '本文件含内容校验编号 · ' + tamperNote() + '</p>';
+
+    var body = b.body.replace(/<div class="acts">/g, '<div>').replace(/<div class="channels">/g, '<div>');
+
+    return [
+      '<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:w="urn:schemas-microsoft-com:office:word" xmlns="http://www.w3.org/TR/REC-html40">',
+      '<head><meta charset="UTF-8"><title>' + esc(FIXED_TITLE) + '</title>',
+      '<style>'
+      + '@page{size:A4;margin:22mm 18mm}'
+      + 'body{font-family:"Noto Serif SC","SimSun",serif;color:#1a1a1a;line-height:1.8;font-size:12pt}'
+      + 'h1{font-size:20pt;text-align:center;color:#1E8A6E;letter-spacing:2px;margin-bottom:8pt;font-weight:900}'
+      + '.meta{font-size:9pt;color:#888;text-align:center;margin-bottom:16pt}'
+      + '.notice{background:#f4faf7;border-left:4px solid #2BAE8C;padding:10pt 14pt;font-size:10.5pt;color:#14574A;margin-bottom:18pt}'
+      + 'section{margin-bottom:16pt} section h2{font-size:14pt;color:#111827;margin-bottom:10pt;padding-left:10pt;border-left:4px solid #2BAE8C}'
+      + 'table.info{border-collapse:collapse;width:100%;font-size:11pt} table.info th,table.info td{border:1px solid #cfd6d2;padding:8pt 12pt} table.info th{width:110pt;background:#f4faf7;font-weight:700}'
+      + '.act{background:#f6faf8;border:1px solid #e5e9f0;padding:10pt 14pt;margin-bottom:8pt} .act-t{font-weight:700;margin-bottom:4pt}'
+      + '.kv{line-height:1.8} .k{font-weight:700;color:#374151}'
+      + '.channel{background:#f6faf8;border:1px solid #e5e9f0;padding:8pt 14pt;margin-bottom:6pt} .c-label{font-weight:700}'
+      + 'ul.demands{list-style:none;padding-left:1.2em} ul.demands li{margin-bottom:6pt;text-indent:-1.2em}'
+      + 'a{color:#1E8A6E;text-decoration:none}'
+      + '</style></head><body>',
+      '<h1>' + esc(FIXED_TITLE) + '</h1><p class="meta">生成时间：' + today() + '</p>',
+      '<div class="notice">【声明】' + esc(FIXED_DECL) + '</div>',
+      b.body, sig, tamper,
+      '<p style="margin-top:18pt;padding-top:10pt;border-top:1px solid #e5e7eb;text-align:center;font-size:8.5pt;color:#aaa;">本内容由填写人自愿提供并对真实性负责 · 本工具仅在本地浏览器处理、数据不上传 · 自助模板非官方文书、不构成法律意见，请经教育主管部门官方渠道提交 · 由 TutoringAppeal 排版生成</p>',
+      '</body></html>'
+    ].join('\n');
+  }
+
+  function safeBase(d) {
+    var base = (d['f-school'] || '').trim().replace(/[\\/:*?"<>|]/g, '') || FIXED_TITLE;
+    return base + '_' + today().replace(/-/g, '') + '_' + contentHash(JSON.stringify(d));
+  }
+
+  function downloadDoc(d) {
+    var html = buildDoc(d);
+    var mhtml = 'MIME-Version: 1.0\nContent-Transfer-Encoding: 8bit\nContent-Type: multipart/related; boundary="NEXT PART"; type="text/html"\n\n'
+      + '--NEXT PART\nContent-Type: text/html; charset="utf-8"\n\n' + html;
+    var blob = new Blob(['\ufeff' + mhtml], { type: 'application/msword;charset=utf-8' });
+    var name = safeBase(d) + '.doc';
+    saveBlob(blob, name);
+    toast('已导出 Word：' + name, 'ok');
+  }
+  function saveBlob(blob, name) {
+    var a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = name;
+    document.body.appendChild(a);
+    a.click();
+    setTimeout(function () { URL.revokeObjectURL(a.href); a.remove(); }, 1500);
+  }
+
+  /* ---------- 图片版（SVG foreignObject + Canvas，纯前端） ---------- */
+  function buildImagePaper(d) {
+    var b = buildSections(d, true);
+    var signer = (d['f-signer'] || '').trim();
+    var sig = '<div class="signature">' + (signer ? '举报人：' + esc(signer) + '<br/>' : '') + today() + '</div>';
+    var tamper = '<div class="tamper">本文件含内容校验编号 · ' + tamperNote() + '</div>';
+    return '<div class="paper">'
+      + '<div class="wm">' + wmHTML(true) + '</div>'
+      + '<div class="content">'
+      + '<header><h1>' + esc(FIXED_TITLE) + '</h1><div class="meta">生成时间：' + today() + '</div></header>'
+      + '<div class="notice"><span class="n-t">【声明】</span>' + esc(FIXED_DECL) + '</div>'
+      + b.body + sig + tamper
+      + '<footer>本内容由填写人自愿提供并对真实性负责 · 本工具仅在本地浏览器处理、数据不上传 · 自助模板非官方文书、不构成法律意见，请经教育主管部门官方渠道提交 · 由 TutoringAppeal 排版生成</footer>'
+      + '</div></div>';
+  }
+
+  function downloadImage(d) {
+    var paperHTML = buildImagePaper(d);
+    var measureDoc = '<!DOCTYPE html><html><head><meta charset="utf-8"><style>' + IMG_CSS
+      + 'html,body{margin:0;padding:0;background:#fff}</style></head><body>' + paperHTML + '</body></html>';
+    var f = document.createElement('iframe');
+    f.style.cssText = 'position:fixed;left:-99999px;top:0;width:' + IMG_W + 'px;height:100px;border:0;visibility:hidden;';
+    f.srcdoc = measureDoc;
+    f.onload = function () {
+      var H = 0;
+      try { H = Math.ceil(f.contentDocument.documentElement.scrollHeight); } catch (e) {}
+      f.remove();
+      if (!H || H < 100) { toast('图片生成失败，请改用手机截图', 'err'); return; }
+      var scale = (H * 2 > 16000) ? 1 : 2;
+      var svg = '<svg xmlns="http://www.w3.org/2000/svg" width="' + IMG_W + '" height="' + H + '">'
+        + '<foreignObject x="0" y="0" width="' + IMG_W + '" height="' + H + '">'
+        + '<div xmlns="http://www.w3.org/1999/xhtml" style="width:' + IMG_W + 'px;background:#fff;'
+        + "font-family:'Noto Serif SC','Source Han Serif SC','SimSun','STSong',serif;color:#1a1a1a;line-height:1.9;\">"
+        + '<style>' + IMG_CSS + '</style>' + paperHTML
+        + '</div></foreignObject></svg>';
+      var img = new Image();
+      img.onload = function () {
+        var c = document.createElement('canvas');
+        c.width = IMG_W * scale; c.height = H * scale;
+        var ctx = c.getContext('2d');
+        ctx.fillStyle = '#fff'; ctx.fillRect(0, 0, c.width, c.height);
+        ctx.drawImage(img, 0, 0, c.width, c.height);
+        var name = safeBase(d) + '.png';
+        var a = document.createElement('a');
+        a.href = c.toDataURL('image/png'); a.download = name;
+        document.body.appendChild(a); a.click(); a.remove();
+        toast('已生成图片：' + name, 'ok');
+      };
+      img.onerror = function () { toast('当前浏览器不支持生成图片，请改用截图', 'err'); };
+      img.src = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svg);
+    };
+    document.body.appendChild(f);
+  }
+
+  /* ---------- 必填校验 + 进度 ---------- */
+  function requiredItems(d) {
+    var items = [];
+    if (!(d['f-school'] || '').trim()) items.push('学校');
+    if (!(d['f-address'] || '').trim()) items.push('地址');
+    if (!d.buke && !d.kaixue && !(d['f-type-other'] || '').trim()) items.push('类型（至少勾选一项或填「其他」）');
+    if (d.buke) {
+      if (!(d['bk-time'] || '').trim()) items.push('补课·时间');
+      if (!(d['bk-grade'] || '').trim()) items.push('补课·年级');
+      if (!(d['bk-real'] || '').trim()) items.push('补课·实质');
+    }
+    if (d.kaixue) {
+      if (!(d['kx-rule'] || '').trim()) items.push('开学·规定时间');
+      if (!(d['kx-actual'] || '').trim()) items.push('开学·实际时间');
+      if (!(d['kx-grade'] || '').trim()) items.push('开学·年级');
+      if (!(d['kx-real'] || '').trim()) items.push('开学·实质');
+    }
+    if ((d['f-type-other'] || '').trim() && !(d['f-other-desc'] || '').trim()) items.push('其他行为·描述');
+    if (!getLines(d['f-demands']).length) items.push('诉求（至少一条）');
+    if (!(d['f-tel'] || '').trim() && !(d['f-net'] || '').trim()) items.push('举报途径（电话或网络）');
+    return items;
+  }
+
+  function updateVisibility() {
+    $('col-buke').classList.toggle('open', $('cb-buke').checked);
+    $('col-kaixue').classList.toggle('open', $('cb-kaixue').checked);
+    $('col-other').classList.toggle('open', !!($('f-type-other').value || '').trim());
+    $('f-fee-text').style.display = $('fee-yes').checked ? '' : 'none';
+
+    /* 检查框视觉态 */
+    document.querySelectorAll('.check').forEach(function (el) {
+      var inp = el.querySelector('input');
+      if (inp) el.classList.toggle('on', inp.checked);
+    });
+  }
+
+  function updateProgress(d) {
+    var missing = requiredItems(d);
+    var filled = 10; /* 必填项总数：学校/地址/类型/诉求/举报途径 + 行为相关（取最大分支 5 项作基数） */
+    var total = 5 + (d.buke ? 3 : 0) + (d.kaixue ? 4 : 0) + ((d['f-type-other'] || '').trim() ? 1 : 0);
+    if (total === 0) total = 5;
+    var done = Math.max(0, total - missing.length);
+    var pct = Math.round((done / total) * 100);
+    $('pfill').style.width = pct + '%';
+    $('pct').textContent = pct + '%';
+    var lbl = $('plbl');
+    if (missing.length === 0) { lbl.textContent = '已就绪'; lbl.style.color = 'var(--ok)'; }
+    else { lbl.textContent = '还差 ' + missing.length + ' 项'; lbl.style.color = 'var(--text-3)'; }
+    return missing;
+  }
+
+  /* 是否已有任何有效内容（用于预览空状态判定） */
+  function hasContent(d) {
+    return !!(
+      (d['f-school'] || '').trim() || (d['f-address'] || '').trim() ||
+      d.buke || d.kaixue || (d['f-type-other'] || '').trim() ||
+      getLines(d['f-demands']).length || (d['f-tel'] || '').trim() ||
+      (d['f-net'] || '').trim() || (d['f-other-desc'] || '').trim() ||
+      (d['f-laws'] || '').trim() || (d['f-evidence'] || '').trim()
+    );
+  }
+
+  var timer = null;
+  function refresh() {
+    updateVisibility();
+    var d = collect();
+    var empty = !hasContent(d);
+    pv.srcdoc = empty ? '' : buildHTML(d);
+    var missing = updateProgress(d);
+    $('pv-empty').style.display = empty ? 'flex' : 'none';
+    var bar = $('validate-bar');
+    if (missing.length && !empty) {
+      $('validate-list').innerHTML = missing.map(function (m) { return '<li>' + esc(m) + '</li>'; }).join('');
+      bar.classList.add('show');
+    } else {
+      bar.classList.remove('show');
+    }
+  }
+  function onInput() {
+    clearTimeout(timer);
+    timer = setTimeout(function () { refresh(); saveDraft(); }, 250);
+  }
+
+  /* 让单个字段在失焦时标红（即时反馈） */
+  document.querySelectorAll('.field[data-req] > input:not(#f-demands), .field[data-req] > textarea:not(#f-demands):not(#f-demands-custom)').forEach(function (inp) {
+    inp.addEventListener('blur', function () {
+      var f = inp.closest('.field');
+      f.classList.toggle('invalid', !(inp.value || '').trim());
+    });
+  });
+
+  /* ---------- 多案例草稿（localStorage，纯本地，不上传） ---------- */
+  var KEY_DRAFTS = 'jubao-page-drafts-v2';
+  var KEY_ACTIVE = 'jubao-page-active-v2';
+  var KEY_SCENARIO = 'jubao-page-scenario-v1';
+
+  function getDrafts() {
+    try { var a = JSON.parse(localStorage.getItem(KEY_DRAFTS)); return Array.isArray(a) ? a : []; }
+    catch (e) { return []; }
+  }
+  function setDrafts(a) { try { localStorage.setItem(KEY_DRAFTS, JSON.stringify(a)); } catch (e) {} }
+  function activeId() { try { return localStorage.getItem(KEY_ACTIVE) || ''; } catch (e) { return ''; } }
+  function setActiveId(id) { try { localStorage.setItem(KEY_ACTIVE, id); } catch (e) {} }
+
+  function defaultData() {
+    var d = {};
+    FIELDS.forEach(function (id) { d[id] = ''; });
+    d.buke = false; d.kaixue = false; d.feeChoice = '';
+    d['f-demands'] = DEFAULT_DEMANDS;
+    d['f-laws'] = '';       /* 附录默认均不勾选 */
+    d['f-evidence'] = '';   /* 附录默认均不勾选 */
+    return d;
+  }
+
+  /* 将一份数据对象写入表单（草稿加载 / 新建案例通用） */
+  function applyData(d) {
+    if (!d) return;
+    FIELDS.forEach(function (id) { if (typeof d[id] === 'string') $(id).value = d[id]; });
+    $('cb-buke').checked = !!d.buke;
+    $('cb-kaixue').checked = !!d.kaixue;
+    ['fee-none', 'fee-unknown', 'fee-yes'].forEach(function (id) { $(id).checked = false; });
+    var map = { none: 'fee-none', unknown: 'fee-unknown', yes: 'fee-yes' };
+    if (map[d.feeChoice]) $(map[d.feeChoice]).checked = true;
+    restoreDemandUI(); restoreLawUI(); restoreEvUI();
+  }
+
+  /* 当前内容自动存入活动草稿（输入时调用） */
+  function saveDraft() {
+    var drafts = getDrafts();
+    var d = collect();
+    var id = activeId();
+    var rec = drafts.filter(function (x) { return x.id === id; })[0];
+    if (!rec) {
+      id = 'c_' + Date.now();
+      rec = { id: id, name: '', school: '', updated: '', data: d };
+      drafts.push(rec);
+      setActiveId(id);
+    } else {
+      rec.data = d;
+    }
+    rec.updated = nowStamp();
+    rec.school = (d['f-school'] || '').trim();
+    setDrafts(drafts);
+    renderCaseSelect();
+  }
+
+  function renderCaseSelect() {
+    var sel = $('case-sel');
+    if (!sel) return;
+    var drafts = getDrafts();
+    var id = activeId();
+    sel.innerHTML = drafts.map(function (x) {
+      var label = (x.name || '未命名案例') + (x.school ? '（' + esc(x.school) + '）' : '');
+      return '<option value="' + x.id + '"' + (x.id === id ? ' selected' : '') + '>' + label + '</option>';
+    }).join('') + '<option value="__new__">＋ 新建案例…</option>';
+  }
+
+  function loadCase(id) {
+    var rec = getDrafts().filter(function (x) { return x.id === id; })[0];
+    if (!rec) return;
+    setActiveId(id);
+    applyData(rec.data);
+    renderCaseSelect();
+    refresh();
+  }
+  function newCase() {
+    /* 不使用 prompt()（在预览 iframe / 打包环境会被拦截），改为自动命名，避免“点了没反应” */
+    var drafts = getDrafts();
+    var used = drafts.map(function (x) { return x.name || ''; });
+    var n = drafts.length + 1;
+    while (used.indexOf('案例 ' + n) !== -1) n++;
+    var id = 'c_' + Date.now() + '_' + n;
+    var d = defaultData();
+    drafts.push({ id: id, name: '案例 ' + n, school: '', updated: nowStamp(), data: d });
+    setDrafts(drafts); setActiveId(id);
+    applyData(d); renderCaseSelect(); refresh();
+    toast('已新建「案例 ' + n + '」，可用左侧下拉切换', 'ok');
+  }
+  function saveCase() {
+    var id = activeId();
+    var drafts = getDrafts();
+    var rec = drafts.filter(function (x) { return x.id === id; })[0];
+    if (!rec) { saveDraft(); rec = getDrafts().filter(function (x) { return x.id === id; })[0]; }
+    if (!rec) return;
+    var d = collect();
+    rec.data = d; rec.updated = nowStamp(); rec.school = (d['f-school'] || '').trim();
+    if (!rec.name) rec.name = (d['f-school'] || '').trim() || '未命名案例';
+    setDrafts(drafts);
+    renderCaseSelect();
+    toast('已保存案例：' + rec.name, 'ok');
+  }
+  var deleteArmed = false, deleteTimer = null;
+  function deleteCase() {
+    /* 不使用 confirm()（会被拦截），改为“再次点击确认”，3 秒内无第二次点击则复位 */
+    var id = activeId();
+    if (!id) return;
+    var rec = getDrafts().filter(function (x) { return x.id === id; })[0];
+    if (!rec) return;
+    var btn = $('btn-case-del');
+    if (!deleteArmed) {
+      deleteArmed = true;
+      if (btn) { btn.textContent = '再次点击删除'; btn.classList.add('armed'); }
+      toast('再次点击「删除」确认删除「' + (rec.name || '未命名案例') + '」', 'warn');
+      clearTimeout(deleteTimer);
+      deleteTimer = setTimeout(function () {
+        deleteArmed = false;
+        if (btn) { btn.textContent = '删除'; btn.classList.remove('armed'); }
+      }, 3000);
+      return;
+    }
+    clearTimeout(deleteTimer); deleteArmed = false;
+    if (btn) { btn.textContent = '删除'; btn.classList.remove('armed'); }
+    var drafts = getDrafts().filter(function (x) { return x.id !== id; });
+    if (!drafts.length) {
+      var nd = defaultData();
+      var nid = 'c_' + Date.now();
+      drafts.push({ id: nid, name: '案例 1', school: '', updated: nowStamp(), data: nd });
+      setActiveId(nid); applyData(nd);
+    } else {
+      setActiveId(drafts[0].id); applyData(drafts[0].data);
+    }
+    setDrafts(drafts);
+    renderCaseSelect(); refresh();
+    toast('已删除案例', 'ok');
+  }
+
+  /* ---------- 场景模板切换 ---------- */
+  function inferScenario(d) {
+    if (d.buke && d.kaixue) return 'all';
+    if (d.buke) return 'buke';
+    if (d.kaixue) return 'kaixue';
+    if (d.feeChoice === 'yes' || (d['f-type-other'] || '').trim() === '违规收费') return 'fee';
+    return 'buke';
+  }
+  function applyScenario(name) {
+    if (name === 'buke') { $('cb-buke').checked = true; $('cb-kaixue').checked = false; }
+    else if (name === 'kaixue') { $('cb-buke').checked = false; $('cb-kaixue').checked = true; }
+    else if (name === 'all') { $('cb-buke').checked = true; $('cb-kaixue').checked = true; }
+    else if (name === 'fee') {
+      $('cb-buke').checked = false; $('cb-kaixue').checked = false;
+      if (!($('f-type-other').value || '').trim()) $('f-type-other').value = '违规收费';
+      $('fee-yes').checked = true; $('fee-none').checked = false; $('fee-unknown').checked = false;
+    }
+    try { localStorage.setItem(KEY_SCENARIO, name); } catch (e) {}
+    setScenarioUI(name);
+    onInput();
+  }
+  function setScenarioUI(name) {
+    document.querySelectorAll('#seg-scenario .seg-btn').forEach(function (b) {
+      b.classList.toggle('on', b.getAttribute('data-sc') === name);
+    });
+  }
+
+  /* 自定义确认弹层（替代原生 confirm，预览 iframe / APK 内均可用） */
+  var _uiCb = null;
+  function uiConfirm(msg, onOk) {
+    _uiCb = (typeof onOk === 'function') ? onOk : null;
+    $('ui-modal-msg').textContent = msg;
+    var m = $('ui-modal');
+    m.hidden = false;
+  }
+  function uiClose(ok) {
+    var m = $('ui-modal');
+    if (m.hidden) return;
+    m.hidden = true;
+    var cb = _uiCb; _uiCb = null;
+    if (ok && cb) cb();
+  }
+  $('ui-ok').addEventListener('click', function () { uiClose(true); });
+  $('ui-cancel').addEventListener('click', function () { uiClose(false); });
+  $('ui-modal').addEventListener('click', function (e) { if (e.target === this) uiClose(false); });
+  document.addEventListener('keydown', function (e) { if (e.key === 'Escape' && !$('ui-modal').hidden) uiClose(false); });
+
+  /* 导出前校验（可选放行）：缺项时弹自定义确认，确认后继续 */
+  function gateCheck(onProceed) {
+    var missing = requiredItems(collect());
+    if (!missing.length) { onProceed(); return; }
+    uiConfirm('还有 ' + missing.length + ' 项必填未完成：\n· ' + missing.join('\n· ') + '\n\n仍要继续导出？', onProceed);
+  }
+
+  FIELDS.forEach(function (id) { $(id).addEventListener('input', onInput); });
+  ['cb-buke', 'cb-kaixue', 'fee-none', 'fee-unknown', 'fee-yes'].forEach(function (id) {
+    $(id).addEventListener('change', onInput);
+  });
+  document.querySelectorAll('.dm-opt').forEach(function (c) {
+    c.addEventListener('change', function () {
+      c.closest('.check').classList.toggle('on', c.checked);
+      composeDemands(); onInput();
+    });
+  });
+  $('f-demands-custom').addEventListener('input', function () { composeDemands(); onInput(); });
+  $('f-evidence-custom').addEventListener('input', function () { composeEv(); onInput(); });
+  $('f-province').addEventListener('change', function () { onInput(); updateChannelHint(); });
+  $('f-city').addEventListener('input', function () { onInput(); });
+
+  /* ---------- 按钮 ---------- */
+  $('btn-copy-plain').addEventListener('click', function () {
+    gateCheck(function () {
+      var text = buildPlainText(collect());
+      copyText(text, '文本已复制，可直接粘贴', '复制失败');
+    });
+  });
+
+  $('btn-word').addEventListener('click', function () {
+    gateCheck(function () { downloadDoc(collect()); });
+  });
+
+  $('btn-image').addEventListener('click', function () {
+    gateCheck(function () { toast('正在生成图片…'); downloadImage(collect()); });
+  });
+
+  $('btn-jump').addEventListener('click', function () {
+    var el = document.querySelector('.preview');
+    if (el && el.scrollIntoView) el.scrollIntoView({ behavior: 'smooth' });
+  });
+
+  $('btn-clear').addEventListener('click', function () {
+    uiConfirm('确定要清空当前案例的全部已填写内容吗？此操作不可恢复。', function () {
+      applyData(defaultData());
+      document.querySelectorAll('.field.invalid').forEach(function (f) { f.classList.remove('invalid'); });
+      updateChannelHint();
+      saveDraft();
+      refresh();
+      toast('已清空，可重新填写', 'ok');
+    });
+  });
+
+  function copyText(text, doneMsg, failMsg) {
+    var done = function () { toast(doneMsg, 'ok'); };
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(text).then(done, function () { fallbackCopy(text, done, failMsg); });
+    } else fallbackCopy(text, done, failMsg);
+  }
+  function fallbackCopy(text, done, failMsg) {
+    var ta = document.createElement('textarea');
+    ta.value = text; ta.style.position = 'fixed'; ta.style.opacity = '0';
+    document.body.appendChild(ta); ta.select();
+    try { document.execCommand('copy'); done(); } catch (e) { toast(failMsg, 'err'); }
+    ta.remove();
+  }
+
+  /* ---------- 主题切换：默认跟随系统，手动切换后持久化 ---------- */
+  var THEME_KEY = 'jubao-page-theme-v1';
+  function applyTheme(t) { document.documentElement.setAttribute('data-theme', t); }
+  (function initTheme() {
+    var saved = null;
+    try { saved = localStorage.getItem(THEME_KEY); } catch (e) {}
+    applyTheme(saved || 'dark');
+  })();
+  $('btn-theme').addEventListener('click', function () {
+    var next = document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+    try { localStorage.setItem(THEME_KEY, next); } catch (e) {}
+    applyTheme(next);
+    toast(next === 'dark' ? '已切换深色模式' : '已切换浅色模式', 'ok');
+  });
+
+  /* ---------- 初始化 ---------- */
+  fillProvinces();
+  buildLawOpts();
+  buildEvOpts();
+
+  /* 多案例草稿：载入活动草稿，无则建默认案例 */
+  var drafts0 = getDrafts();
+  var aid = activeId();
+  var arec = drafts0.filter(function (x) { return x.id === aid; })[0];
+  if (arec) {
+    applyData(arec.data);
+  } else if (drafts0.length) {
+    applyData(drafts0[0].data); setActiveId(drafts0[0].id);
+  } else {
+    var dd0 = defaultData();
+    var nid0 = 'c_' + Date.now();
+    drafts0.push({ id: nid0, name: '案例 1', school: '', updated: nowStamp(), data: dd0 });
+    setDrafts(drafts0); setActiveId(nid0); applyData(dd0);
+  }
+  renderCaseSelect();
+
+  /* 场景：按当前内容推断并高亮 */
+  setScenarioUI(inferScenario(collect()));
+
+  /* 案例管理 */
+  $('case-sel').addEventListener('change', function () {
+    if (this.value === '__new__') { newCase(); } else if (this.value) { loadCase(this.value); }
+  });
+  $('btn-case-new').addEventListener('click', newCase);
+  $('btn-case-save').addEventListener('click', saveCase);
+  $('btn-case-del').addEventListener('click', deleteCase);
+
+  /* 场景切换 */
+  document.querySelectorAll('#seg-scenario .seg-btn').forEach(function (b) {
+    b.addEventListener('click', function () { applyScenario(b.getAttribute('data-sc')); });
+  });
+  document.querySelectorAll('.law-opt').forEach(function (c) {
+    c.addEventListener('change', function () { c.closest('.check').classList.toggle('on', c.checked); composeLaws(); onInput(); });
+  });
+  document.querySelectorAll('.ev-opt').forEach(function (c) {
+    c.addEventListener('change', function () { c.closest('.check').classList.toggle('on', c.checked); composeEv(); onInput(); });
+  });
+  updateChannelHint();
+  refresh();
+})();
+</script>
+</body>
+</html>
