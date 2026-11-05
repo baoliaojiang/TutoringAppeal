@@ -11,7 +11,7 @@
 | --- | --- | --- |
 | 在线使用 | https://baoliaojiang.github.io/TutoringAppeal/ | 浏览器直接打开，无需下载 |
 | 单文件网页 | [index.html](index.html) | 下载后双击，离线可用 |
-| Android APK | [v1.0.2 下载](https://github.com/baoliaojiang/TutoringAppeal/releases/download/v1.0.2/TutoringAppeal-v1.0.2.apk) | WebView 离线壳，装好即用，无任何权限 |
+| Android APK | [v1.0.3 下载](https://github.com/baoliaojiang/TutoringAppeal/releases/download/v1.0.3/TutoringAppeal-v1.0.3.apk) | WebView 离线壳，装好即用，无任何权限 |
 
 > ⚠️ **免责声明**
 > 本工具仅作排版辅助，**非官方文书、不构成法律意见**；所有内容由你本人填写并对真实性负责；
@@ -41,7 +41,7 @@
 
 `dist/校园反映小助手.apk` 为已签名的 WebView 壳应用（minSdk 21 / targetSdk 28，V1+V2+V3 签名）。
 体积约 2.9 MB（含内嵌字库），**不申请任何权限**（无网络、无存储、无设备信息），安装后即可在手机上离线使用。
-正式下载入口见上方「下载」表格（Release 资产 `TutoringAppeal-v1.0.2.apk`）。
+正式下载入口见上方「下载」表格（Release 资产 `TutoringAppeal-v1.0.3.apk`）。
 
 ## 隐私
 
@@ -49,6 +49,10 @@
 **删除草稿**：清除浏览器站点数据（设置 → 隐私 → 清除站点数据）即可。
 
 ## 更新日志
+
+**v1.0.3**（2026-11-06）
+- 优化字体：全界面统一为内嵌思源黑体，不再调用任何品牌字体
+- 优化文档：许可说明同步界面实际字体，去掉易误解的表述
 
 **v1.0.2**（2026-11-06）
 - 全新文档四件套：用户协议、隐私政策、声明、开源许可，页脚与免责条一键打开
